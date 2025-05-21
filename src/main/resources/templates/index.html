@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MultiDeck - DeckBuilder Universel</title>
+
+    <!-- DaisyUI via CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@3.9.4/dist/full.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome pour les icônes -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Animation CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+
+    <style>
+        /* Effets personnalisés */
+        .card-hover-effect {
+            transition: all 0.3s ease;
+            transform-style: preserve-3d;
+        }
+
+        .card-hover-effect:hover {
+            transform: translateY(-10px) rotateX(5deg);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .gradient-text {
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .parallax-bg {
+            background-attachment: fixed;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-base-200">
+<!-- Navigation -->
+<nav class="navbar bg-base-100 shadow-lg sticky top-0 z-50">
+    <div class="flex-1">
+        <a th:href="@{/}" class="btn btn-ghost normal-case text-xl">
+            <i class="fas fa-cards text-primary mr-2"></i>
+            <span class="gradient-text font-bold">MultiDeck</span>
+        </a>
+    </div>
+    <div class="flex-none">
+        <ul class="menu menu-horizontal px-1">
+            <li><a th:href="@{/decks}" class="font-semibold">Mes Decks</a></li>
+            <li><a th:href="@{/community}" class="font-semibold">Communauté</a></li>
+            <li>
+                <details>
+                    <summary class="font-semibold">
+                        Jeux
+                    </summary>
+                    <ul class="p-2 bg-base-100 rounded-t-none z-50">
+                        <li><a>Magic: The Gathering</a></li>
+                        <li><a>Yu-Gi-Oh!</a></li>
+                        <li><a>Pokémon TCG</a></li>
+                        <li><a>Hearthstone</a></li>
+                        <li><a>Autres...</a></li>
+                    </ul>
+                </details>
+            </li>
+        </ul>
+
+        <div class="dropdown dropdown-end">
+            <label tabindex="0" class="btn btn-ghost btn-circle avatar">
+                <div class="w-10 rounded-full bg-primary text-white flex items-center justify-center">
+                    <i class="fas fa-user text-xl"></i>
+                </div>
+            </label>
+            <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
+                <li><a>Profil</a></li>
+                <li><a>Paramètres</a></li>
+                <li><a th:href="@{/logout}">Déconnexion</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero Section -->
+<div class="hero min-h-[70vh] parallax-bg" style="background-image: url('https://source.unsplash.com/random/1600x900/?cards,gaming');">
+    <div class="hero-overlay bg-opacity-60"></div>
+    <div class="hero-content text-center text-neutral-content animate__animated animate__fadeIn">
+        <div class="max-w-md">
+            <h1 class="mb-5 text-5xl font-bold gradient-text">Construisez. Partagez. Jouez.</h1>
+            <p class="mb-5">La plateforme ultime pour créer et gérer vos decks pour tous vos jeux de cartes favoris.</p>
+            <button class="btn btn-primary animate__animated animate__pulse animate__infinite">Commencer</button>
+        </div>
+    </div>
+</div>
+
+<!-- Games Section -->
+<section class="py-16 px-4">
+    <div class="container mx-auto">
+        <h2 class="text-3xl font-bold text-center mb-12 gradient-text">Jeux Supportés</h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <!-- Magic -->
+            <div class="card bg-base-100 shadow-xl card-hover-effect">
+                <figure class="px-10 pt-10">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/Magic_the_gathering-card_back.jpg/320px-Magic_the_gathering-card_back.jpg"
+                         alt="Magic" class="rounded-xl h-40 object-cover" />
+                </figure>
+                <div class="card-body items-center text-center">
+                    <h3 class="card-title">Magic: The Gathering</h3>
+                    <p>Créez des decks pour Standard, Modern, Commander et plus encore</p>
+                    <div class="card-actions mt-4">
+                        <button class="btn btn-primary">Explorer</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Yu-Gi-Oh -->
+            <div class="card bg-base-100 shadow-xl card-hover-effect">
+                <figure class="px-10 pt-10">
+                    <img src="https://upload.wikimedia.org/wikipedia/en/thumb/3/3a/Yu-Gi-Oh_TCG_back.jpg/320px-Yu-Gi-Oh_TCG_back.jpg"
+                         alt="Yu-Gi-Oh" class="rounded-xl h-40 object-cover" />
+                </figure>
+                <div class="card-body items-center text-center">
+                    <h3 class="card-title">Yu-Gi-Oh!</h3>
+                    <p>Construisez vos decks avec des milliers de cartes disponibles</p>
+                    <div class="card-actions mt-4">
+                        <button class="btn btn-secondary">Explorer</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pokémon -->
+            <div class="card bg-base-100 shadow-xl card-hover-effect">
+                <figure class="px-10 pt-10">
+                    <img src="https://upload.wikimedia.org/wikipedia/en/thumb/4/4b/Pokemon_card_back.jpg/320px-Pokemon_card_back.jpg"
+                         alt="Pokémon" class="rounded-xl h-40 object-cover" />
+                </figure>
+                <div class="card-body items-center text-center">
+                    <h3 class="card-title">Pokémon TCG</h3>
+                    <p>Créez des decks compétitifs ou pour le plaisir</p>
+                    <div class="card-actions mt-4">
+                        <button class="btn btn-accent">Explorer</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hearthstone -->
+            <div class="card bg-base-100 shadow-xl card-hover-effect">
+                <figure class="px-10 pt-10">
+                    <img src="https://d15f34w2p8l1cc.cloudfront.net/hearthstone/7e4db3f6c3f4c9a7a6a5a8e0f5c9e3e5f4c9a7a6a5a8e0f5c9e3e5f4c9a7a6a5.jpg"
+                         alt="Hearthstone" class="rounded-xl h-40 object-cover" />
+                </figure>
+                <div class="card-body items-center text-center">
+                    <h3 class="card-title">Hearthstone</h3>
+                    <p>Planifiez vos stratégies pour chaque classe</p>
+                    <div class="card-actions mt-4">
+                        <button class="btn btn-info">Explorer</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-16 bg-base-300">
+    <div class="container mx-auto px-4">
+        <h2 class="text-3xl font-bold text-center mb-12 gradient-text">Fonctionnalités</h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="flex flex-col items-center text-center p-6 rounded-lg bg-base-100 shadow-lg transform transition hover:scale-105">
+                <div class="w-16 h-16 bg-primary rounded-full flex items-center justify-center mb-4 text-white">
+                    <i class="fas fa-cogs text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-2">Deck Builder Intelligent</h3>
+                <p>Notre outil de construction vous guide pour créer des decks équilibrés et conformes aux règles de chaque jeu.</p>
+            </div>
+
+            <div class="flex flex-col items-center text-center p-6 rounded-lg bg-base-100 shadow-lg transform transition hover:scale-105">
+                <div class="w-16 h-16 bg-secondary rounded-full flex items-center justify-center mb-4 text-white">
+                    <i class="fas fa-users text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-2">Communauté Active</h3>
+                <p>Partagez vos decks, recevez des feedbacks et découvrez les créations des autres joueurs.</p>
+            </div>
+
+            <div class="flex flex-col items-center text-center p-6 rounded-lg bg-base-100 shadow-lg transform transition hover:scale-105">
+                <div class="w-16 h-16 bg-accent rounded-full flex items-center justify-center mb-4 text-white">
+                    <i class="fas fa-chart-line text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-2">Statistiques Avancées</h3>
+                <p>Analysez les performances de vos decks avec nos outils statistiques complets.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-20 bg-gradient-to-r from-primary to-secondary text-white">
+    <div class="container mx-auto text-center">
+        <h2 class="text-4xl font-bold mb-6">Prêt à construire votre premier deck ?</h2>
+        <p class="text-xl mb-8">Rejoignez des milliers de joueurs et améliorez votre expérience de jeu.</p>
+        <div class="flex justify-center gap-4">
+            <button class="btn btn-neutral btn-lg animate__animated animate__pulse animate__infinite">
+                S'inscrire <i class="fas fa-arrow-right ml-2"></i>
+            </button>
+            <button class="btn btn-outline btn-lg">
+                Voir la démo <i class="fas fa-play ml-2"></i>
+            </button>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer p-10 bg-neutral text-neutral-content">
+    <div>
+            <span class="footer-title">
+                <i class="fas fa-cards text-primary mr-2"></i>
+                <span class="gradient-text font-bold">MultiDeck</span>
+            </span>
+        <p>La plateforme ultime pour les passionnés de jeux de cartes<br/>Depuis 2023</p>
+    </div>
+    <div>
+        <span class="footer-title">Navigation</span>
+        <a class="link link-hover">Accueil</a>
+        <a class="link link-hover">Jeux</a>
+        <a class="link link-hover">Decks</a>
+        <a class="link link-hover">Communauté</a>
+    </div>
+    <div>
+        <span class="footer-title">Légal</span>
+        <a class="link link-hover">Conditions d'utilisation</a>
+        <a class="link link-hover">Politique de confidentialité</a>
+        <a class="link link-hover">Cookies</a>
+    </div>
+    <div>
+        <span class="footer-title">Réseaux</span>
+        <div class="grid grid-flow-col gap-4">
+            <a><i class="fab fa-twitter text-2xl"></i></a>
+            <a><i class="fab fa-discord text-2xl"></i></a>
+            <a><i class="fab fa-youtube text-2xl"></i></a>
+        </div>
+    </div>
+</footer>
+
+<!-- Scripts pour les animations -->
+<script>
+    // Animation au scroll
+    document.addEventListener('DOMContentLoaded', function() {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate__animated', 'animate__fadeInUp');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.card, .flex.flex-col').forEach(card => {
+            observer.observe(card);
+        });
+    });
+</script>
+</body>
+</html>
