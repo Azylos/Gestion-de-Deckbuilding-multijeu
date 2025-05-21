@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Connexion - MultiDeck</title>
+
+  <!-- DaisyUI via CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@3.9.4/dist/full.css" rel="stylesheet" type="text/css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Font Awesome pour les icônes -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Animation CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+
+  <style>
+    .gradient-text {
+      background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .card-hover-effect {
+      transition: all 0.3s ease;
+    }
+
+    .card-hover-effect:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+
+    .input-focus-effect:focus {
+      box-shadow: 0 0 0 2px #3b82f6;
+      border-color: transparent;
+    }
+
+    .shake-animation {
+      animation: shake 0.5s;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+      20%, 40%, 60%, 80% { transform: translateX(5px); }
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-base-200 to-base-300 flex items-center justify-center p-4">
+<div class="card bg-base-100 shadow-2xl w-full max-w-md card-hover-effect animate__animated animate__fadeIn">
+  <div class="card-body">
+    <div class="text-center mb-6">
+      <a th:href="@{/}" class="inline-flex items-center">
+        <i class="fas fa-cards text-primary text-3xl mr-2"></i>
+        <span class="gradient-text font-bold text-2xl">MultiDeck</span>
+      </a>
+      <h2 class="text-2xl font-bold mt-4">Connexion</h2>
+      <p class="text-sm opacity-70">Accédez à votre espace personnel</p>
+    </div>
+
+    <!-- Messages d'erreur -->
+    <div th:if="${param.error}" class="alert alert-error mb-4 shake-animation">
+      <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <span>Identifiant ou mot de passe incorrect</span>
+    </div>
+
+    <form th:action="@{/login}" method="post">
+      <!-- Email/Username -->
+      <div class="form-control mb-4">
+        <label class="label">
+          <span class="label-text font-semibold">Email ou nom d'utilisateur</span>
+        </label>
+        <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                            <i class="fas fa-user"></i>
+                        </span>
+          <input type="text" name="username"
+                 class="input input-bordered w-full pl-10 input-focus-effect"
+                 placeholder="email@exemple.com ou pseudo" required />
+        </div>
+      </div>
+
+      <!-- Mot de passe -->
+      <div class="form-control mb-4">
+        <label class="label">
+          <span class="label-text font-semibold">Mot de passe</span>
+        </label>
+        <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                            <i class="fas fa-lock"></i>
+                        </span>
+          <input type="password" name="password"
+                 class="input input-bordered w-full pl-10 input-focus-effect"
+                 placeholder="••••••••" required />
+        </div>
+        <label class="label">
+          <a th:href="@{/reset-password}" class="label-text-alt link link-primary">Mot de passe oublié ?</a>
+        </label>
+      </div>
+
+      <!-- Remember me -->
+      <div class="form-control mb-6">
+        <label class="label cursor-pointer justify-start gap-2">
+          <input type="checkbox" name="remember-me" class="checkbox checkbox-primary checkbox-sm" />
+          <span class="label-text">Se souvenir de moi</span>
+        </label>
+      </div>
+
+      <!-- Bouton de connexion -->
+      <button type="submit" class="btn btn-primary w-full mb-4">
+        Se connecter <i class="fas fa-sign-in-alt ml-2"></i>
+      </button>
+
+      <!-- Lien vers inscription -->
+      <div class="text-center text-sm">
+        <span>Pas encore de compte ? </span>
+        <a th:href="@{/inscription}" class="link link-primary font-semibold">S'inscrire</a>
+      </div>
+
+    </form>
+  </div>
+</div>
+
+<!-- Script pour animations -->
+<script>
+  // Animation des champs au focus
+  document.querySelectorAll('input').forEach(input => {
+    input.addEventListener('focus', function() {
+      this.parentElement.querySelector('i').classList.add('text-primary');
+    });
+    input.addEventListener('blur', function() {
+      this.parentElement.querySelector('i').classList.remove('text-primary');
+    });
+  });
+
+  // Animation d'erreur
+  if (document.querySelector('.alert-error')) {
+    setTimeout(() => {
+      document.querySelector('.alert-error').classList.remove('shake-animation');
+    }, 500);
+  }
+</script>
+</body>
+</html>

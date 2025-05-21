@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inscription - MultiDeck</title>
+
+  <!-- DaisyUI via CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@3.9.4/dist/full.css" rel="stylesheet" type="text/css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Font Awesome pour les icônes -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Animation CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+
+  <style>
+    .gradient-text {
+      background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .card-hover-effect {
+      transition: all 0.3s ease;
+    }
+
+    .card-hover-effect:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+
+    .input-focus-effect:focus {
+      box-shadow: 0 0 0 2px #3b82f6;
+      border-color: transparent;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-base-200 to-base-300 flex items-center justify-center p-4">
+<div class="card bg-base-100 shadow-2xl w-full max-w-md card-hover-effect animate__animated animate__fadeIn">
+  <div class="card-body">
+    <div class="text-center mb-6">
+      <a th:href="@{/}" class="inline-flex items-center">
+        <i class="fas fa-cards text-primary text-3xl mr-2"></i>
+        <span class="gradient-text font-bold text-2xl">MultiDeck</span>
+      </a>
+      <h2 class="text-2xl font-bold mt-4">Créer un compte</h2>
+      <p class="text-sm opacity-70">Rejoignez notre communauté de joueurs</p>
+    </div>
+
+    <form th:action="@{/utilisateurs/inscription}" th:object="${utilisateur}" method="post">
+      <!-- Messages d'erreur -->
+      <div th:if="${#fields.hasErrors('*')}" class="alert alert-error mb-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span>Veuillez corriger les erreurs dans le formulaire.</span>
+      </div>
+      <!-- Nom d'utilisateur -->
+      <div class="form-control mb-4">
+        <label class="label">
+          <span class="label-text font-semibold">Nom d'utilisateur</span>
+        </label>
+        <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                            <i class="fas fa-user"></i>
+                        </span>
+          <input type="text" th:field="*{username}"
+                 class="input input-bordered w-full pl-10 input-focus-effect"
+                 placeholder="Votre pseudo" required />
+        </div>
+        <div th:if="${#fields.hasErrors('username')}" class="text-error text-xs mt-1">
+          <span th:each="err : ${#fields.errors('username')}" th:text="${err}"></span>
+        </div>
+      </div>
+
+      <!-- Email -->
+      <div class="form-control mb-4">
+        <label class="label">
+          <span class="label-text font-semibold">Email</span>
+        </label>
+        <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                            <i class="fas fa-envelope"></i>
+                        </span>
+          <input type="email" th:field="*{email}"
+                 class="input input-bordered w-full pl-10 input-focus-effect"
+                 placeholder="email@exemple.com" required />
+        </div>
+        <div th:if="${#fields.hasErrors('email')}" class="text-error text-xs mt-1">
+          <span th:each="err : ${#fields.errors('email')}" th:text="${err}"></span>
+        </div>
+      </div>
+
+      <!-- Mot de passe -->
+      <div class="form-control mb-6">
+        <label class="label">
+          <span class="label-text font-semibold">Mot de passe</span>
+        </label>
+        <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                            <i class="fas fa-lock"></i>
+                        </span>
+          <input type="password" th:field="*{password}"
+                 class="input input-bordered w-full pl-10 input-focus-effect"
+                 placeholder="••••••••" required />
+        </div>
+        <div th:if="${#fields.hasErrors('password')}" class="text-error text-xs mt-1">
+          <span th:each="err : ${#fields.errors('password')}" th:text="${err}"></span>
+        </div>
+        <label class="label">
+          <span class="label-text-alt">8 caractères minimum</span>
+        </label>
+      </div>
+
+      <!-- Bouton d'inscription -->
+      <button type="submit" class="btn btn-primary w-full mb-4">
+        S'inscrire <i class="fas fa-user-plus ml-2"></i>
+      </button>
+
+      <!-- Lien vers connexion -->
+      <div class="text-center text-sm">
+        <span>Déjà un compte ? </span>
+        <a th:href="@{/login}" class="link link-primary font-semibold">Se connecter</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Script pour animations -->
+<script>
+  // Animation des champs au focus
+  document.querySelectorAll('input').forEach(input => {
+    input.addEventListener('focus', function() {
+      this.parentElement.querySelector('i').classList.add('text-primary');
+    });
+    input.addEventListener('blur', function() {
+      this.parentElement.querySelector('i').classList.remove('text-primary');
+    });
+  });
+</script>
+</body>
+</html>
