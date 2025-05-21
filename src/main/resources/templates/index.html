@@ -53,8 +53,7 @@
     </div>
     <div class="flex-none">
         <ul class="menu menu-horizontal px-1">
-            <li><a th:href="@{/decks}" class="font-semibold">Mes Decks</a></li>
-            <li><a th:href="@{/community}" class="font-semibold">Communauté</a></li>
+            <li><a th:href="@{/utilisateurs/mes-decks}" class="font-semibold">Mes Decks</a></li>
             <li>
                 <details>
                     <summary class="font-semibold">
@@ -80,7 +79,9 @@
             <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
                 <li><a>Profil</a></li>
                 <li><a>Paramètres</a></li>
-                <li><a th:href="@{/logout}">Déconnexion</a></li>
+                <form th:action="@{/logout}" method="post">
+                    <button type="submit">Se déconnecter</button>
+                </form>
             </ul>
         </div>
     </div>
@@ -137,14 +138,13 @@
             <!-- Pokémon -->
             <div class="card bg-base-100 shadow-xl card-hover-effect">
                 <figure class="px-10 pt-10">
-                    <img src="https://upload.wikimedia.org/wikipedia/en/thumb/4/4b/Pokemon_card_back.jpg/320px-Pokemon_card_back.jpg"
-                         alt="Pokémon" class="rounded-xl h-40 object-cover" />
+                    <img th:src="@{/images/pokemonTCG.webp}" alt="Image Pokémon TCG" />
                 </figure>
                 <div class="card-body items-center text-center">
                     <h3 class="card-title">Pokémon TCG</h3>
                     <p>Créez des decks compétitifs ou pour le plaisir</p>
                     <div class="card-actions mt-4">
-                        <button class="btn btn-accent">Explorer</button>
+                        <a class="btn btn-accent" th:href="@{/decks}">Explorer</a>
                     </div>
                 </div>
             </div>
@@ -152,7 +152,7 @@
             <!-- Hearthstone -->
             <div class="card bg-base-100 shadow-xl card-hover-effect">
                 <figure class="px-10 pt-10">
-                    <img src="https://d15f34w2p8l1cc.cloudfront.net/hearthstone/7e4db3f6c3f4c9a7a6a5a8e0f5c9e3e5f4c9a7a6a5a8e0f5c9e3e5f4c9a7a6a5.jpg"
+                    <img th:src="@{/images/hearthstone.jpg}"
                          alt="Hearthstone" class="rounded-xl h-40 object-cover" />
                 </figure>
                 <div class="card-body items-center text-center">
@@ -206,12 +206,12 @@
         <h2 class="text-4xl font-bold mb-6">Prêt à construire votre premier deck ?</h2>
         <p class="text-xl mb-8">Rejoignez des milliers de joueurs et améliorez votre expérience de jeu.</p>
         <div class="flex justify-center gap-4">
-            <button class="btn btn-neutral btn-lg animate__animated animate__pulse animate__infinite">
+            <a class="btn btn-neutral btn-lg animate__animated animate__pulse animate__infinite" th:href="@{/inscription}">
                 S'inscrire <i class="fas fa-arrow-right ml-2"></i>
-            </button>
-            <button class="btn btn-outline btn-lg">
-                Voir la démo <i class="fas fa-play ml-2"></i>
-            </button>
+            </a>
+            <a class="btn btn-outline btn-lg" th:href="@{/login}">
+                Connexion <i class="fas fa-play ml-2"></i>
+            </a>
         </div>
     </div>
 </section>
