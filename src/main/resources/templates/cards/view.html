@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Carte Pokémon</title>
+</head>
+    <body>
+        <h1 th:text="${card.name}">Nom de la carte</h1>
+        <img th:src="${card.imageUrl}" alt="Image carte"/>
+        <p>
+            <strong>Type :</strong> <span th:text="${card.supertype}"></span>
+        </p>
+        <p><strong>Description :</strong></p>
+        <p th:text="${card.text}"></p>
+    </body>
+</html>
