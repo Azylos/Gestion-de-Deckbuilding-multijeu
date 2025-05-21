@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decks Pokémon TCG - MultiDeck</title>
+
+    <!-- DaisyUI via CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@3.9.4/dist/full.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome pour les icônes -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Animation CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+
+    <style>
+        .gradient-text {
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .deck-card {
+            transition: all 0.3s ease;
+            transform-style: preserve-3d;
+        }
+
+        .deck-card:hover {
+            transform: translateY(-5px) rotateX(2deg);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .type-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .pokemon-bg {
+            background-image: url('https://images.pokemontcg.io/base1/logo.png');
+            background-size: 30%;
+            background-position: right bottom;
+            background-repeat: no-repeat;
+            background-blend-mode: overlay;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-base-200">
+<!-- Navigation -->
+<nav class="navbar bg-base-100 shadow-lg sticky top-0 z-50">
+    <div class="flex-1">
+        <a th:href="@{/}" class="btn btn-ghost normal-case text-xl">
+            <i class="fas fa-cards text-primary mr-2"></i>
+            <span class="gradient-text font-bold">MultiDeck</span>
+        </a>
+    </div>
+    <div class="flex-none gap-2">
+        <div class="form-control">
+            <input type="text" placeholder="Rechercher un deck..." class="input input-bordered w-64" />
+        </div>
+        <div class="dropdown dropdown-end">
+            <label tabindex="0" class="btn btn-ghost btn-circle avatar">
+                <div class="w-10 rounded-full bg-primary text-white flex items-center justify-center">
+                    <i class="fas fa-user text-xl"></i>
+                </div>
+            </label>
+            <ul tabindex="0" class="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52">
+                <li><a>Profil</a></li>
+                <li><a>Mes Decks</a></li>
+                <li><a th:href="@{/logout}">Déconnexion</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<main class="container mx-auto py-8 px-4">
+    <!-- Header Section -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4 pokemon-bg bg-primary/10 p-6 rounded-box">
+        <div>
+            <div class="flex items-center gap-2 mb-2">
+                <img src="https://images.pokemontcg.io/logo.png" alt="Pokémon TCG" class="h-10">
+                <h1 class="text-3xl font-bold">Decks Pokémon TCG</h1>
+            </div>
+            <p class="text-lg">Découvrez les meilleurs decks partagés par la communauté</p>
+        </div>
+        <a th:href="@{/decks/new}" class="btn btn-primary">
+            <i class="fas fa-plus mr-2"></i> Créer un deck
+        </a>
+    </div>
+
+    <!-- Filters -->
+    <div class="bg-base-100 p-4 rounded-box shadow mb-8">
+        <div class="flex flex-wrap gap-4 items-center">
+            <div>
+                <label class="label">
+                    <span class="label-text font-semibold">Format</span>
+                </label>
+                <select class="select select-bordered">
+                    <option disabled selected>Tous les formats</option>
+                    <option>Standard</option>
+                    <option>Expanded</option>
+                    <option>Legacy</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="label">
+                    <span class="label-text font-semibold">Type</span>
+                </label>
+                <select class="select select-bordered">
+                    <option disabled selected>Tous les types</option>
+                    <option>Feu</option>
+                    <option>Eau</option>
+                    <option>Plante</option>
+                    <option>Électrik</option>
+                    <option>Psy</option>
+                    <option>Combat</option>
+                    <option>Ténèbres</option>
+                    <option>Métal</option>
+                    <option>Fée</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="label">
+                    <span class="label-text font-semibold">Tri</span>
+                </label>
+                <select class="select select-bordered">
+                    <option>Récents</option>
+                    <option>Populaires</option>
+                    <option>Mieux notés</option>
+                </select>
+            </div>
+
+            <div class="flex items-end h-full">
+                <button class="btn btn-ghost">
+                    <i class="fas fa-filter mr-2"></i> Plus de filtres
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Decks Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Deck Card 1 -->
+        <div th:each="deck : ${decks}" class="card bg-base-100 shadow-xl deck-card animate__animated animate__fadeIn">
+            <figure class="px-4 pt-4">
+                <img th:src="${deck.thumbnailUrl}"
+                     alt="Deck thumbnail"
+                     class="rounded-xl h-48 w-full object-cover" />
+            </figure>
+            <div class="card-body">
+                <div class="flex justify-between items-start">
+                    <h2 class="card-title" th:text="${deck.name}">Deck Mew VMAX</h2>
+                    <div class="badge badge-primary gap-2">
+                        <i class="fas fa-star"></i>
+                        <span th:text="${deck.rating}">4.8</span>
+                    </div>
+                </div>
+                <p th:text="${deck.description}">Deck compétitif basé sur Mew VMAX avec Genesect V pour une consistance maximale</p>
+
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <span class="type-badge bg-red-100 text-red-800">Feu</span>
+                    <span class="type-badge bg-blue-100 text-blue-800">Eau</span>
+                    <span class="type-badge bg-yellow-100 text-yellow-800">Électrik</span>
+                </div>
+
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <div class="avatar">
+                            <div class="w-8 rounded-full bg-primary text-white flex items-center justify-center">
+                                <i class="fas fa-user text-sm"></i>
+                            </div>
+                        </div>
+                        <span class="font-medium" th:text="${deck.author.username}">PokemonMaster</span>
+                    </div>
+                    <div class="text-sm text-gray-500" th:text="${#temporals.format(deck.creationDate, 'dd/MM/yyyy')}">15/06/2023</div>
+                </div>
+
+                <div class="card-actions justify-end mt-4">
+                    <button class="btn btn-sm btn-outline">
+                        <i class="far fa-eye mr-1"></i> <span th:text="${deck.views}">1245</span>
+                    </button>
+                    <a th:href="@{'/decks/pokemon/' + ${deck.id}}" class="btn btn-sm btn-primary">
+                        Voir le deck <i class="fas fa-arrow-right ml-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Deck Card 2 -->
+        <div class="card bg-base-100 shadow-xl deck-card animate__animated animate__fadeIn">
+            <figure class="px-4 pt-4">
+                <img src="https://images.pokemontcg.io/swsh12/35_hires.png"
+                     alt="Deck thumbnail"
+                     class="rounded-xl h-48 w-full object-cover" />
+            </figure>
+            <div class="card-body">
+                <div class="flex justify-between items-start">
+                    <h2 class="card-title">Deck Palkia Intrépide</h2>
+                    <div class="badge badge-primary gap-2">
+                        <i class="fas fa-star"></i>
+                        4.6
+                    </div>
+                </div>
+                <p>Deck contrôle basé sur Palkia VSTAR avec l'ascension de Kyurem</p>
+
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <span class="type-badge bg-blue-100 text-blue-800">Eau</span>
+                    <span class="type-badge bg-purple-100 text-purple-800">Dragon</span>
+                </div>
+
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <div class="avatar">
+                            <div class="w-8 rounded-full bg-secondary text-white flex items-center justify-center">
+                                <i class="fas fa-user text-sm"></i>
+                            </div>
+                        </div>
+                        <span class="font-medium">WaterTypeExpert</span>
+                    </div>
+                    <div class="text-sm text-gray-500">10/06/2023</div>
+                </div>
+
+                <div class="card-actions justify-end mt-4">
+                    <button class="btn btn-sm btn-outline">
+                        <i class="far fa-eye mr-1"></i> 987
+                    </button>
+                    <button class="btn btn-sm btn-primary">
+                        Voir le deck <i class="fas fa-arrow-right ml-1"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Deck Card 3 -->
+        <div class="card bg-base-100 shadow-xl deck-card animate__animated animate__fadeIn">
+            <figure class="px-4 pt-4">
+                <img src="https://images.pokemontcg.io/swsh12/51_hires.png"
+                     alt="Deck thumbnail"
+                     class="rounded-xl h-48 w-full object-cover" />
+            </figure>
+            <div class="card-body">
+                <div class="flex justify-between items-start">
+                    <h2 class="card-title">Deck Arceus VSTAR</h2>
+                    <div class="badge badge-primary gap-2">
+                        <i class="fas fa-star"></i>
+                        4.9
+                    </div>
+                </div>
+                <p>Deck polyvalent utilisant Arceus VSTAR comme moteur principal</p>
+
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <span class="type-badge bg-gray-100 text-gray-800">Colorless</span>
+                </div>
+
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <div class="avatar">
+                            <div class="w-8 rounded-full bg-accent text-white flex items-center justify-center">
+                                <i class="fas fa-user text-sm"></i>
+                            </div>
+                        </div>
+                        <span class="font-medium">DeckBuilderPro</span>
+                    </div>
+                    <div class="text-sm text-gray-500">05/06/2023</div>
+                </div>
+
+                <div class="card-actions justify-end mt-4">
+                    <button class="btn btn-sm btn-outline">
+                        <i class="far fa-eye mr-1"></i> 2103
+                    </button>
+                    <button class="btn btn-sm btn-primary">
+                        Voir le deck <i class="fas fa-arrow-right ml-1"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="flex justify-center mt-10">
+        <div class="join">
+            <button class="join-item btn">«</button>
+            <button class="join-item btn btn-active">1</button>
+            <button class="join-item btn">2</button>
+            <button class="join-item btn">3</button>
+            <button class="join-item btn">»</button>
+        </div>
+    </div>
+</main>
+
+<!-- Footer -->
+<footer class="footer p-10 bg-neutral text-neutral-content mt-12">
+    <div>
+            <span class="footer-title">
+                <i class="fas fa-cards text-primary mr-2"></i>
+                <span class="gradient-text font-bold">MultiDeck</span>
+            </span>
+        <p>La plateforme ultime pour les passionnés de jeux de cartes<br/>Depuis 2023</p>
+    </div>
+    <div>
+        <span class="footer-title">Jeux</span>
+        <a class="link link-hover">Magic: The Gathering</a>
+        <a class="link link-hover">Pokémon TCG</a>
+        <a class="link link-hover">Yu-Gi-Oh!</a>
+        <a class="link link-hover">Hearthstone</a>
+    </div>
+    <div>
+        <span class="footer-title">Communauté</span>
+        <a class="link link-hover">Decks populaires</a>
+        <a class="link link-hover">Tournois</a>
+        <a class="link link-hover">Guides</a>
+    </div>
+</footer>
+
+<!-- Scripts -->
+<script>
+    // Animation au scroll
+    document.addEventListener('DOMContentLoaded', function() {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate__animated', 'animate__fadeInUp');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.deck-card').forEach(card => {
+            observer.observe(card);
+        });
+    });
+</script>
+</body>
+</html>
