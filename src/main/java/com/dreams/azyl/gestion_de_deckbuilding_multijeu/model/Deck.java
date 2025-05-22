@@ -16,6 +16,10 @@ public class Deck implements Serializable {
     @Column(nullable = false)
     private String name;
 
+    private String description;
+
+    private int views; // simple compteur
+
     @ManyToOne
     private Utilisateur owner;
 
@@ -64,5 +68,21 @@ public class Deck implements Serializable {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public int getViews() {
+        return views;
+    }
+
+    public void setViews(int views) {
+        this.views = views;
     }
 }

@@ -148,27 +148,24 @@
 
     <!-- Decks Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <!-- Deck Card 1 -->
         <div th:each="deck : ${decks}" class="card bg-base-100 shadow-xl deck-card animate__animated animate__fadeIn">
-            <figure class="px-4 pt-4">
-                <img th:src="${deck.thumbnailUrl}"
-                     alt="Deck thumbnail"
-                     class="rounded-xl h-48 w-full object-cover" />
-            </figure>
+<!--            <figure class="px-4 pt-4">-->
+<!--                <img th:src="${deck.thumbnailUrl}" alt="Deck thumbnail"-->
+<!--                     class="rounded-xl h-48 w-full object-cover"/>-->
+<!--            </figure>-->
             <div class="card-body">
-                <div class="flex justify-between items-start">
-                    <h2 class="card-title" th:text="${deck.name}">Deck Mew VMAX</h2>
-                    <div class="badge badge-primary gap-2">
-                        <i class="fas fa-star"></i>
-                        <span th:text="${deck.rating}">4.8</span>
-                    </div>
-                </div>
-                <p th:text="${deck.description}">Deck compétitif basé sur Mew VMAX avec Genesect V pour une consistance maximale</p>
+<!--                <div class="flex justify-between items-start">-->
+<!--                    <h2 class="card-title" th:text="${deck.name}">Nom du deck</h2>-->
+<!--                    <div class="badge badge-primary gap-2" th:if="${deck.rating != null}">-->
+<!--                        <i class="fas fa-star"></i>-->
+<!--                        <span th:text="${deck.rating}">4.5</span>-->
+<!--                    </div>-->
+<!--                </div>-->
+                <p th:text="${deck.description}">Description du deck</p>
 
                 <div class="flex flex-wrap gap-2 mb-4">
-                    <span class="type-badge bg-red-100 text-red-800">Feu</span>
-                    <span class="type-badge bg-blue-100 text-blue-800">Eau</span>
-                    <span class="type-badge bg-yellow-100 text-yellow-800">Électrik</span>
+                <span class="type-badge bg-gray-200 text-gray-800"
+                      th:each="type : ${deck.types}" th:text="${type}">Type</span>
                 </div>
 
                 <div class="flex items-center justify-between">
@@ -178,14 +175,16 @@
                                 <i class="fas fa-user text-sm"></i>
                             </div>
                         </div>
-                        <span class="font-medium" th:text="${deck.author.username}">PokemonMaster</span>
+                        <span class="font-medium" th:text="${deck.owner.username}">Auteur</span>
                     </div>
-                    <div class="text-sm text-gray-500" th:text="${#temporals.format(deck.creationDate, 'dd/MM/yyyy')}">15/06/2023</div>
+                    <div class="text-sm text-gray-500"
+                         th:text="${#temporals.format(deck.createdAt, 'dd/MM/yyyy')}">Date</div>
                 </div>
 
                 <div class="card-actions justify-end mt-4">
                     <button class="btn btn-sm btn-outline">
-                        <i class="far fa-eye mr-1"></i> <span th:text="${deck.views}">1245</span>
+                        <i class="far fa-eye mr-1"></i>
+                        <span th:text="${deck.views}">123</span>
                     </button>
                     <a th:href="@{'/decks/pokemon/' + ${deck.id}}" class="btn btn-sm btn-primary">
                         Voir le deck <i class="fas fa-arrow-right ml-1"></i>
@@ -193,107 +192,27 @@
                 </div>
             </div>
         </div>
-
-        <!-- Deck Card 2 -->
-        <div class="card bg-base-100 shadow-xl deck-card animate__animated animate__fadeIn">
-            <figure class="px-4 pt-4">
-                <img src="https://images.pokemontcg.io/swsh12/35_hires.png"
-                     alt="Deck thumbnail"
-                     class="rounded-xl h-48 w-full object-cover" />
-            </figure>
-            <div class="card-body">
-                <div class="flex justify-between items-start">
-                    <h2 class="card-title">Deck Palkia Intrépide</h2>
-                    <div class="badge badge-primary gap-2">
-                        <i class="fas fa-star"></i>
-                        4.6
-                    </div>
-                </div>
-                <p>Deck contrôle basé sur Palkia VSTAR avec l'ascension de Kyurem</p>
-
-                <div class="flex flex-wrap gap-2 mb-4">
-                    <span class="type-badge bg-blue-100 text-blue-800">Eau</span>
-                    <span class="type-badge bg-purple-100 text-purple-800">Dragon</span>
-                </div>
-
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                        <div class="avatar">
-                            <div class="w-8 rounded-full bg-secondary text-white flex items-center justify-center">
-                                <i class="fas fa-user text-sm"></i>
-                            </div>
-                        </div>
-                        <span class="font-medium">WaterTypeExpert</span>
-                    </div>
-                    <div class="text-sm text-gray-500">10/06/2023</div>
-                </div>
-
-                <div class="card-actions justify-end mt-4">
-                    <button class="btn btn-sm btn-outline">
-                        <i class="far fa-eye mr-1"></i> 987
-                    </button>
-                    <button class="btn btn-sm btn-primary">
-                        Voir le deck <i class="fas fa-arrow-right ml-1"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Deck Card 3 -->
-        <div class="card bg-base-100 shadow-xl deck-card animate__animated animate__fadeIn">
-            <figure class="px-4 pt-4">
-                <img src="https://images.pokemontcg.io/swsh12/51_hires.png"
-                     alt="Deck thumbnail"
-                     class="rounded-xl h-48 w-full object-cover" />
-            </figure>
-            <div class="card-body">
-                <div class="flex justify-between items-start">
-                    <h2 class="card-title">Deck Arceus VSTAR</h2>
-                    <div class="badge badge-primary gap-2">
-                        <i class="fas fa-star"></i>
-                        4.9
-                    </div>
-                </div>
-                <p>Deck polyvalent utilisant Arceus VSTAR comme moteur principal</p>
-
-                <div class="flex flex-wrap gap-2 mb-4">
-                    <span class="type-badge bg-gray-100 text-gray-800">Colorless</span>
-                </div>
-
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                        <div class="avatar">
-                            <div class="w-8 rounded-full bg-accent text-white flex items-center justify-center">
-                                <i class="fas fa-user text-sm"></i>
-                            </div>
-                        </div>
-                        <span class="font-medium">DeckBuilderPro</span>
-                    </div>
-                    <div class="text-sm text-gray-500">05/06/2023</div>
-                </div>
-
-                <div class="card-actions justify-end mt-4">
-                    <button class="btn btn-sm btn-outline">
-                        <i class="far fa-eye mr-1"></i> 2103
-                    </button>
-                    <button class="btn btn-sm btn-primary">
-                        Voir le deck <i class="fas fa-arrow-right ml-1"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
     </div>
 
     <!-- Pagination -->
-    <div class="flex justify-center mt-10">
+    <div class="flex justify-center mt-10" th:if="${totalPages > 1}">
         <div class="join">
-            <button class="join-item btn">«</button>
-            <button class="join-item btn btn-active">1</button>
-            <button class="join-item btn">2</button>
-            <button class="join-item btn">3</button>
-            <button class="join-item btn">»</button>
+            <a th:if="${currentPage > 0}"
+               th:href="@{/decks(page=${currentPage - 1})}"
+               class="join-item btn">«</a>
+
+            <a th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+               th:href="@{/decks(page=${i})}"
+               th:text="${i + 1}"
+               class="join-item btn"
+               th:classappend="${i == currentPage} ? 'btn-active' : ''"></a>
+
+            <a th:if="${currentPage < totalPages - 1}"
+               th:href="@{/decks(page=${currentPage + 1})}"
+               class="join-item btn">»</a>
         </div>
     </div>
+
 </main>
 
 <!-- Footer -->
