@@ -69,9 +69,9 @@ public class DeckController {
         return "decks/view";
     }
 
+    //TODO: quand change pagination créer d'autre deck
     @GetMapping("/new")
-    public String showDeckCreationForm(Model model,
-                                       @PageableDefault(size = 20) Pageable pageable) {
+    public String showDeckCreationForm(Model model, @PageableDefault(size = 20) Pageable pageable) {
 
         // 1) Créer et persister un deck brouillon avec un nom non-null
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -108,9 +108,7 @@ public class DeckController {
 
     @PostMapping("/{deckId}/cards")
     @ResponseBody
-    public ResponseEntity<?> addCardAjax(
-            @PathVariable Long deckId,
-            @RequestBody Map<String,String> payload) {
+    public ResponseEntity<?> addCardAjax(@PathVariable Long deckId, @RequestBody Map<String,String> payload) {
 
         Deck deck = deckRepository.findById(deckId)
                 .orElseThrow(() -> new ResponseStatusException(

@@ -9,7 +9,7 @@
     <link href="https://cdn.jsdelivr.net/npm/daisyui@3.9.4/dist/full.css" rel="stylesheet" type="text/css" />
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Font Awesome pour les icônes -->
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <!-- Animation CSS -->
@@ -23,7 +23,7 @@
         }
 
         .deck-card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-5px) scale(1.02);
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
         }
 
@@ -48,11 +48,28 @@
             font-size: 0.75rem;
             font-weight: bold;
         }
+
+        .floating-actions {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            z-index: 40;
+        }
+
+        @media (max-width: 768px) {
+            .floating-actions {
+                bottom: 1rem;
+                right: 1rem;
+            }
+        }
     </style>
 </head>
 <body class="min-h-screen bg-base-200">
 <!-- Navigation -->
-<nav class="navbar bg-base-100 shadow-lg sticky top-0 z-50">
+<nav class="navbar bg-base-100 shadow-lg sticky top-0 z-50 px-4">
     <div class="flex-1">
         <a th:href="@{/}" class="btn btn-ghost normal-case text-xl">
             <i class="fas fa-cards text-primary mr-2"></i>
@@ -60,6 +77,9 @@
         </a>
     </div>
     <div class="flex-none gap-2">
+        <a th:href="@{/utilisateurs/mes-decks}" class="btn btn-ghost">
+            <i class="fas fa-arrow-left mr-2"></i> Retour
+        </a>
         <div class="dropdown dropdown-end">
             <label tabindex="0" class="btn btn-ghost btn-circle avatar">
                 <div class="w-10 rounded-full bg-primary text-white flex items-center justify-center">
@@ -67,9 +87,9 @@
                 </div>
             </label>
             <ul tabindex="0" class="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52">
-                <li><a>Profil</a></li>
-                <li><a th:href="@{/utilisateurs/mes-decks}">Mes Decks</a></li>
-                <li><a th:href="@{/logout}">Déconnexion</a></li>
+                <li><a th:href="@{/profile}"><i class="fas fa-user mr-2"></i> Profil</a></li>
+                <li><a th:href="@{/utilisateurs/mes-decks}"><i class="fas fa-cards mr-2"></i> Mes Decks</a></li>
+                <li><a th:href="@{/logout}"><i class="fas fa-sign-out mr-2"></i> Déconnexion</a></li>
             </ul>
         </div>
     </div>
@@ -77,18 +97,30 @@
 
 <!-- Main Content -->
 <main class="container mx-auto px-4 py-8">
+    <!-- Breadcrumb Navigation -->
+    <div class="text-sm breadcrumbs mb-6">
+        <ul>
+            <li><a th:href="@{/}">Accueil</a></li>
+            <li><a th:href="@{/decks}">Mes Decks</a></li>
+            <li class="font-semibold" th:text="${deck.name}">Nom du Deck</li>
+        </ul>
+    </div>
+
     <!-- Deck Header -->
     <div class="bg-base-100 rounded-box shadow-lg p-6 mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
             <h1 class="text-3xl font-bold mb-2" th:text="${deck.name}">Nom du Deck</h1>
-            <p class="text-sm text-gray-600">
-                Créé par <span class="font-medium" th:text="${deck.ownerName}">Auteur</span>
-                le <span th:text="${#temporals.format(deck.createdAt, 'dd/MM/yyyy')}">01/01/2023</span>
-            </p>
+            <div class="flex items-center gap-2 flex-wrap">
+                <span class="badge badge-outline" th:text="${deck.format}">Format</span>
+                <p class="text-sm text-gray-600">
+                    Créé par <span class="font-medium" th:text="${deck.ownerName}">Auteur</span>
+                    le <span th:text="${#temporals.format(deck.createdAt, 'dd/MM/yyyy')}">01/01/2023</span>
+                </p>
+            </div>
             <p class="mt-2 text-gray-700" th:text="${deck.description ?: 'Aucune description'}">Description du deck</p>
         </div>
 
-        <div class="flex gap-2">
+        <div class="flex gap-2 flex-wrap">
             <a th:href="@{'/decks/' + ${deck.id} + '/edit'}" class="btn btn-primary">
                 <i class="fas fa-edit mr-2"></i> Modifier
             </a>
@@ -100,16 +132,26 @@
 
     <!-- Cards Grid -->
     <div class="mb-8">
-        <h2 class="text-2xl font-bold mb-4">Cartes du deck</h2>
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-2xl font-bold">Cartes du deck</h2>
+            <div class="tabs tabs-boxed">
+                <a class="tab tab-active">Vue Cartes</a>
+                <a th:href="@{'/decks/' + ${deck.id} + '/list'}" class="tab">Vue Liste</a>
+            </div>
+        </div>
 
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
             <!-- Card Item -->
             <div th:each="card : ${deck.cards}"
-                 class="deck-card animate__animated animate__fadeIn relative">
+                 class="deck-card animate__animated animate__fadeIn relative group">
                 <div class="card-quantity" th:text="'×' + ${card.quantity}">×1</div>
                 <img th:src="${card.imageUrl}"
                      th:alt="${card.name}"
                      class="card-image" />
+                <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300"></div>
+                <div class="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <p class="text-white font-medium text-sm truncate" th:text="${card.name}">Nom de la carte</p>
+                </div>
             </div>
         </div>
 
@@ -166,7 +208,16 @@
     </div>
 </main>
 
-<!-- Delete Confirmation Modal -->
+<!-- Floating Action Buttons -->
+<div class="floating-actions">
+    <button class="btn btn-circle btn-primary shadow-lg tooltip tooltip-left" data-tip="Retour en haut" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+    <a th:href="@{'/decks/' + ${deck.id} + '/edit'}" class="btn btn-circle btn-secondary shadow-lg tooltip tooltip-left" data-tip="Modifier le deck">
+        <i class="fas fa-edit"></i>
+    </a>
+</div>
+
 <!-- Delete Confirmation Modal -->
 <dialog id="delete-modal" class="modal">
     <div class="modal-box">
@@ -199,6 +250,12 @@
             </span>
         <p>La plateforme ultime pour les passionnés de jeux de cartes<br/>Depuis 2023</p>
     </div>
+    <div>
+        <span class="footer-title">Navigation</span>
+        <a th:href="@{/}" class="link link-hover">Accueil</a>
+        <a th:href="@{/utilisateurs/mes-decks}" class="link link-hover">Mes Decks</a>
+        <a th:href="@{/community}" class="link link-hover">Communauté</a>
+    </div>
 </footer>
 
 <!-- Scripts -->
@@ -215,6 +272,38 @@
 
         document.querySelectorAll('.deck-card').forEach(card => {
             observer.observe(card);
+        });
+
+        // Initialize tooltips
+        const tooltips = document.querySelectorAll('[data-tip]');
+        tooltips.forEach(tooltip => {
+            tooltip.addEventListener('mouseenter', function() {
+                const tip = this.getAttribute('data-tip');
+                const tooltipElement = document.createElement('div');
+                tooltipElement.className = 'tooltip-text absolute bg-gray-800 text-white text-xs rounded py-1 px-2 whitespace-nowrap';
+                tooltipElement.textContent = tip;
+
+                const rect = this.getBoundingClientRect();
+                const position = this.getAttribute('data-tip-position') || 'top';
+
+                if (position === 'left') {
+                    tooltipElement.style.right = (window.innerWidth - rect.left) + 'px';
+                    tooltipElement.style.top = rect.top + 'px';
+                } else {
+                    tooltipElement.style.left = rect.left + 'px';
+                    tooltipElement.style.bottom = (window.innerHeight - rect.top) + 'px';
+                }
+
+                tooltipElement.id = 'current-tooltip';
+                document.body.appendChild(tooltipElement);
+            });
+
+            tooltip.addEventListener('mouseleave', function() {
+                const existingTooltip = document.getElementById('current-tooltip');
+                if (existingTooltip) {
+                    existingTooltip.remove();
+                }
+            });
         });
     });
 </script>
