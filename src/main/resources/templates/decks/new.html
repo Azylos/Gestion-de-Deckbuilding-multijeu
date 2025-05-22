@@ -168,7 +168,7 @@
                             <div class="form-control">
                                 <input type="text" placeholder="Rechercher une carte..." class="input input-bordered" />
                             </div>
-                            <div class="dropdown dropdown-end">
+                            <div class="dropdown dropdown-end z-50">
                                 <label tabindex="0" class="btn btn-ghost">
                                     <i class="fas fa-filter mr-2"></i> Filtres
                                 </label>
@@ -217,15 +217,12 @@
                     </div>
 
                     <!-- Pagination -->
-                    <div class="flex justify-center mt-6">
-                        <div class="join">
-                            <button class="join-item btn">«</button>
-                            <button class="join-item btn btn-active">1</button>
-                            <button class="join-item btn">2</button>
-                            <button class="join-item btn">3</button>
-                            <button class="join-item btn">»</button>
-                        </div>
-                    </div>
+                    <a th:each="i : ${#numbers.sequence(0, totalCardPages - 1)}"
+                       th:href="@{/decks/new(page=${i})}"
+                       th:text="${i + 1}"
+                       th:classappend="${i == currentCardPage} ? 'btn-active' : ''"
+                       class="btn join-item">
+                    </a>
                 </div>
             </div>
 
@@ -299,8 +296,15 @@
                             <span class="ml-auto font-medium"><span id="validation-pokemon-count">0</span>/20</span>
                         </div>
 
-                        <button id="validate-deck" type="submit" class="btn btn-success w-full mt-4" disabled>
-                            <i class="fas fa-check mr-2"></i> Valider le Deck
+                        <input type="hidden" name="status" id="deck-status" value="BROUILLON" />
+
+                        <!-- Boutons avec JS pour modifier le champ hidden -->
+                        <button type="submit" class="btn btn-secondary" onclick="document.getElementById('deck-status').value='BROUILLON'">
+                            Enregistrer en Brouillon
+                        </button>
+
+                        <button type="submit" class="btn btn-primary" onclick="document.getElementById('deck-status').value='PUBLIE'">
+                            Publier le Deck
                         </button>
                     </div>
                 </div>

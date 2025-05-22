@@ -12,11 +12,12 @@ public class DeckViewDto {
     private int views;
     private String thumbnailUrl;
     private List<String> types; // ex: ["Feu", "Électrik"]
+    private String format;
 
     public DeckViewDto() {
     }
 
-    public DeckViewDto(Long id, String name, String description, String ownerName, LocalDateTime createdAt, int views, String thumbnailUrl, List<String> types) {
+    public DeckViewDto(Long id, String name, String description, String ownerName, LocalDateTime createdAt, int views, String thumbnailUrl, List<String> types, String format) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -25,6 +26,7 @@ public class DeckViewDto {
         this.views = views;
         this.thumbnailUrl = thumbnailUrl;
         this.types = types;
+        this.format = format;
     }
 
     public Long getId() {
@@ -89,6 +91,14 @@ public class DeckViewDto {
 
     public void setTypes(List<String> types) {
         this.types = types;
+    }
+
+    public String getFormat() {
+        return format;
+    }
+
+    public void setFormat(String format) {
+        this.format = format;
     }
 }
 

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Mes Decks</title>
+</head>
+<body>
+
+<h1>Mes Decks par Jeu</h1>
+
+<div th:each="entry : ${decksParJeu}">
+    <h2 th:text="${entry.key}">Nom du jeu</h2>
+
+    <div th:each="deck : ${entry.value}">
+        <div>
+            <strong th:text="${deck.name}">Nom du Deck</strong> -
+            <span th:text="${deck.description}">Description</span>
+            <a th:href="@{'/decks/' + ${deck.id}}">Voir</a>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,12 +1,14 @@
 package com.dreams.azyl.gestion_de_deckbuilding_multijeu.dto;
 
+import com.dreams.azyl.gestion_de_deckbuilding_multijeu.model.enums.DeckStatut;
+
 import java.util.List;
 
 public class DeckFormDto {
     private String name;
     private String format;
     private List<String> selectedCardIds;
-
+    private DeckStatut statut;
     public String getName() {
         return name;
     }
@@ -30,4 +32,14 @@ public class DeckFormDto {
     public void setSelectedCardIds(List<String> selectedCardIds) {
         this.selectedCardIds = selectedCardIds;
     }
+
+    public DeckStatut getStatut() {
+        return statut;
+    }
+
+    public void setStatut(DeckStatut statut) {
+        this.statut = statut;
+    }
+
+
 }

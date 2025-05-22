@@ -1,5 +1,6 @@
 package com.dreams.azyl.gestion_de_deckbuilding_multijeu.model;
 
+import com.dreams.azyl.gestion_de_deckbuilding_multijeu.model.enums.DeckStatut;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
@@ -17,8 +18,11 @@ public class Deck implements Serializable {
     private String name;
 
     private String description;
-
     private int views; // simple compteur
+    private String format;
+
+    @Enumerated(EnumType.STRING)
+    private DeckStatut statut;
 
     @ManyToOne
     private Utilisateur owner;
@@ -84,5 +88,21 @@ public class Deck implements Serializable {
 
     public void setViews(int views) {
         this.views = views;
+    }
+
+    public DeckStatut getStatut() {
+        return statut;
+    }
+
+    public void setStatut(DeckStatut statut) {
+        this.statut = statut;
+    }
+
+    public String getFormat() {
+        return format;
+    }
+
+    public void setFormat(String format) {
+        this.format = format;
     }
 }
