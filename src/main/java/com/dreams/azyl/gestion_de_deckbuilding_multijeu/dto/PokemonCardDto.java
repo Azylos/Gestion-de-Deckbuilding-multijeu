@@ -9,6 +9,7 @@ public class PokemonCardDto {
     private List<String> subtypes;
     private String imageUrl;
     private String text;
+    private Integer quantity;
 
     public PokemonCardDto() {
 
@@ -69,5 +70,13 @@ public class PokemonCardDto {
 
     public void setText(String text) {
         this.text = text;
+    }
+
+    public Integer getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(Integer quantity) {
+        this.quantity = quantity;
     }
 }

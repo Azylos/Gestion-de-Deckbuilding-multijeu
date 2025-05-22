@@ -223,6 +223,6 @@ public class DeckController {
         }
 
         deckRepository.delete(deck);
-        return "redirect:/decks";
+        return "redirect:/utilisateurs/mes-decks";
     }
 }

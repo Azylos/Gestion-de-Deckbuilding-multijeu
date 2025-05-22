@@ -18,7 +18,6 @@ public class DeckViewMapper {
 
     public DeckViewDto toDeckView(Deck deck) {
         String thumbnail = null;
-
         List<String> types = new ArrayList<>();
 
         if (!deck.getCards().isEmpty()) {
@@ -32,7 +31,7 @@ public class DeckViewMapper {
             }
         }
 
-        return new DeckViewDto(
+        DeckViewDto dto = new DeckViewDto(
                 deck.getId(),
                 deck.getName(),
                 deck.getDescription(),
@@ -43,6 +42,18 @@ public class DeckViewMapper {
                 types,
                 deck.getFormat()
         );
+
+        List<PokemonCardDto> cardDtos = deck.getCards().stream()
+                .map(dc -> {
+                    PokemonCardDto cd = pokemonApiClient.getCardById(dc.getApiCardId());
+                    cd.setQuantity(dc.getQuantity());
+                    return cd;
+                })
+                .toList();
+
+        dto.setCards(cardDtos);
+
+        return dto;
     }
 }
 

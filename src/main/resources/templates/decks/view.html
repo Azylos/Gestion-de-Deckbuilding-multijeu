@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="'Deck : ' + ${deck.name}">Deck Pokémon</title>
+
+    <!-- DaisyUI via CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@3.9.4/dist/full.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome pour les icônes -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Animation CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+
+    <style>
+        .deck-card {
+            transition: all 0.3s ease;
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+
+        .deck-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-image {
+            height: 240px;
+            object-fit: contain;
+            width: 100%;
+        }
+
+        .card-quantity {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background-color: rgba(0,0,0,0.7);
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-base-200">
+<!-- Navigation -->
+<nav class="navbar bg-base-100 shadow-lg sticky top-0 z-50">
+    <div class="flex-1">
+        <a th:href="@{/}" class="btn btn-ghost normal-case text-xl">
+            <i class="fas fa-cards text-primary mr-2"></i>
+            <span class="font-bold">MultiDeck</span>
+        </a>
+    </div>
+    <div class="flex-none gap-2">
+        <div class="dropdown dropdown-end">
+            <label tabindex="0" class="btn btn-ghost btn-circle avatar">
+                <div class="w-10 rounded-full bg-primary text-white flex items-center justify-center">
+                    <i class="fas fa-user text-xl"></i>
+                </div>
+            </label>
+            <ul tabindex="0" class="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52">
+                <li><a>Profil</a></li>
+                <li><a th:href="@{/utilisateurs/mes-decks}">Mes Decks</a></li>
+                <li><a th:href="@{/logout}">Déconnexion</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<main class="container mx-auto px-4 py-8">
+    <!-- Deck Header -->
+    <div class="bg-base-100 rounded-box shadow-lg p-6 mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+            <h1 class="text-3xl font-bold mb-2" th:text="${deck.name}">Nom du Deck</h1>
+            <p class="text-sm text-gray-600">
+                Créé par <span class="font-medium" th:text="${deck.ownerName}">Auteur</span>
+                le <span th:text="${#temporals.format(deck.createdAt, 'dd/MM/yyyy')}">01/01/2023</span>
+            </p>
+            <p class="mt-2 text-gray-700" th:text="${deck.description ?: 'Aucune description'}">Description du deck</p>
+        </div>
+
+        <div class="flex gap-2">
+            <a th:href="@{'/decks/' + ${deck.id} + '/edit'}" class="btn btn-primary">
+                <i class="fas fa-edit mr-2"></i> Modifier
+            </a>
+            <button class="btn btn-error" onclick="document.getElementById('delete-modal').showModal()">
+                <i class="fas fa-trash mr-2"></i> Supprimer
+            </button>
+        </div>
+    </div>
+
+    <!-- Cards Grid -->
+    <div class="mb-8">
+        <h2 class="text-2xl font-bold mb-4">Cartes du deck</h2>
+
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+            <!-- Card Item -->
+            <div th:each="card : ${deck.cards}"
+                 class="deck-card animate__animated animate__fadeIn relative">
+                <div class="card-quantity" th:text="'×' + ${card.quantity}">×1</div>
+                <img th:src="${card.imageUrl}"
+                     th:alt="${card.name}"
+                     class="card-image" />
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div th:if="${#lists.isEmpty(deck.cards)}" class="text-center py-12">
+            <i class="fas fa-cards text-4xl text-gray-300 mb-4"></i>
+            <h3 class="text-xl font-medium mb-2">Ce deck ne contient aucune carte</h3>
+            <p class="text-gray-500 mb-4">Commencez par ajouter des cartes à votre deck</p>
+            <a th:href="@{'/decks/' + ${deck.id} + '/edit'}" class="btn btn-primary">
+                <i class="fas fa-plus mr-2"></i> Ajouter des cartes
+            </a>
+        </div>
+    </div>
+
+    <!-- Deck Summary -->
+    <div class="bg-base-100 rounded-box shadow-lg p-6">
+        <h2 class="text-2xl font-bold mb-4">Résumé du deck</h2>
+        <div class="stats stats-vertical lg:stats-horizontal shadow w-full">
+            <div class="stat">
+                <div class="stat-figure text-primary">
+                    <i class="fas fa-cards text-2xl"></i>
+                </div>
+                <div class="stat-title">Total de cartes</div>
+                <div class="stat-value text-primary" th:text="${#lists.size(deck.cards)}">60</div>
+            </div>
+
+            <div class="stat">
+                <div class="stat-figure text-secondary">
+                    <i class="fas fa-paw text-2xl"></i>
+                </div>
+                <div class="stat-title">Pokémon</div>
+                <div class="stat-value text-secondary"
+                     th:text="${#lists.size(deck.cards.?[supertype == 'Pokémon'])}">12</div>
+            </div>
+
+            <div class="stat">
+                <div class="stat-figure text-accent">
+                    <i class="fas fa-user text-2xl"></i>
+                </div>
+                <div class="stat-title">Dresseurs</div>
+                <div class="stat-value text-accent"
+                     th:text="${#lists.size(deck.cards.?[supertype == 'Trainer'])}">24</div>
+            </div>
+
+            <div class="stat">
+                <div class="stat-figure text-warning">
+                    <i class="fas fa-bolt text-2xl"></i>
+                </div>
+                <div class="stat-title">Énergies</div>
+                <div class="stat-value text-warning"
+                     th:text="${#lists.size(deck.cards.?[supertype == 'Energy'])}">24</div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Delete Confirmation Modal -->
+<!-- Delete Confirmation Modal -->
+<dialog id="delete-modal" class="modal">
+    <div class="modal-box">
+        <h3 class="font-bold text-lg">Confirmer la suppression</h3>
+        <p class="py-4">Êtes-vous sûr de vouloir supprimer définitivement ce deck ?</p>
+        <div class="modal-action space-x-2">
+            <!-- Bouton pour fermer le dialog -->
+            <button type="button" class="btn" onclick="document.getElementById('delete-modal').close()">
+                Annuler
+            </button>
+
+            <form th:action="@{/decks/{id}/delete(id=${deck.id})}" method="post" class="inline">
+                <!-- CSRF token si Spring Security l'exige -->
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+                <button type="submit" class="btn btn-error">
+                    <i class="fas fa-trash mr-2"></i> Supprimer
+                </button>
+            </form>
+        </div>
+    </div>
+</dialog>
+
+<!-- Footer -->
+<footer class="footer p-10 bg-neutral text-neutral-content mt-12">
+    <div>
+            <span class="footer-title">
+                <i class="fas fa-cards text-primary mr-2"></i>
+                <span class="font-bold">MultiDeck</span>
+            </span>
+        <p>La plateforme ultime pour les passionnés de jeux de cartes<br/>Depuis 2023</p>
+    </div>
+</footer>
+
+<!-- Scripts -->
+<script>
+    // Animation au scroll
+    document.addEventListener('DOMContentLoaded', function() {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate__animated', 'animate__fadeInUp');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.deck-card').forEach(card => {
+            observer.observe(card);
+        });
+    });
+</script>
+</body>
+</html>

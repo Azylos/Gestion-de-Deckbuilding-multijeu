@@ -2,23 +2,229 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Mes Decks</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mes Decks - MultiDeck</title>
+
+    <!-- DaisyUI via CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@3.9.4/dist/full.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome pour les icônes -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Animation CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+
+    <style>
+        .gradient-text {
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .deck-card {
+            transition: all 0.3s ease;
+        }
+
+        .deck-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .game-logo {
+            height: 40px;
+            width: auto;
+            object-fit: contain;
+            margin-right: 12px;
+        }
+    </style>
 </head>
-<body>
-
-<h1>Mes Decks par Jeu</h1>
-
-<div th:each="entry : ${decksParJeu}">
-    <h2 th:text="${entry.key}">Nom du jeu</h2>
-
-    <div th:each="deck : ${entry.value}">
-        <div>
-            <strong th:text="${deck.name}">Nom du Deck</strong> -
-            <span th:text="${deck.description}">Description</span>
-            <a th:href="@{'/decks/' + ${deck.id}}">Voir</a>
+<body class="min-h-screen bg-base-200">
+<!-- Navigation -->
+<nav class="navbar bg-base-100 shadow-lg sticky top-0 z-50">
+    <div class="flex-1">
+        <a th:href="@{/}" class="btn btn-ghost normal-case text-xl">
+            <i class="fas fa-cards text-primary mr-2"></i>
+            <span class="gradient-text font-bold">MultiDeck</span>
+        </a>
+    </div>
+    <div class="flex-none gap-2">
+        <a th:href="@{/decks/new}" class="btn btn-primary">
+            <i class="fas fa-plus mr-2"></i> Nouveau Deck
+        </a>
+        <div class="dropdown dropdown-end">
+            <label tabindex="0" class="btn btn-ghost btn-circle avatar">
+                <div class="w-10 rounded-full bg-primary text-white flex items-center justify-center">
+                    <i class="fas fa-user text-xl"></i>
+                </div>
+            </label>
+            <ul tabindex="0" class="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52">
+                <li><a>Profil</a></li>
+                <li><a th:href="@{/decks}">Mes Decks</a></li>
+                <li><a th:href="@{/logout}">Déconnexion</a></li>
+            </ul>
         </div>
     </div>
-</div>
+</nav>
 
+<!-- Main Content -->
+<main class="container mx-auto py-8 px-4">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+        <div>
+            <h1 class="text-3xl font-bold mb-2">Mes Decks</h1>
+            <div class="text-sm breadcrumbs">
+                <ul>
+                    <li><a th:href="@{/}">Accueil</a></li>
+                    <li>Mes Decks</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="flex gap-2 mt-4 md:mt-0">
+            <div class="form-control">
+                <input type="text" placeholder="Rechercher un deck..." class="input input-bordered" />
+            </div>
+            <div class="dropdown dropdown-end">
+                <label tabindex="0" class="btn btn-ghost">
+                    <i class="fas fa-filter mr-2"></i> Filtres
+                </label>
+                <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
+                    <li><a>Tous les jeux</a></li>
+                    <li><a>Magic: The Gathering</a></li>
+                    <li><a>Pokémon TCG</a></li>
+                    <li><a>Yu-Gi-Oh!</a></li>
+                    <li><a>Hearthstone</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Decks by Game -->
+    <div th:each="entry : ${decksParJeu}" class="mb-12">
+        <!-- Game Header -->
+        <div class="flex items-center mb-6 p-4 bg-base-100 rounded-box shadow">
+            <img th:src="@{'/images/games/' + ${entry.key.toLowerCase().replace(' ', '-')} + '.png'}"
+                 th:alt="${entry.key}"
+                 class="game-logo" />
+            <h2 class="text-2xl font-bold" th:text="${entry.key}">Nom du jeu</h2>
+            <span class="badge badge-primary ml-auto" th:text="${entry.value.size()} + ' decks'">5 decks</span>
+        </div>
+
+        <!-- Decks Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Deck Card -->
+            <div th:each="deck : ${entry.value}" class="card bg-base-100 shadow-xl deck-card animate__animated animate__fadeIn">
+                <div class="card-body">
+                    <div class="flex justify-between items-start">
+                        <h3 class="card-title" th:text="${deck.name}">Nom du Deck</h3>
+                    </div>
+                    <p class="text-sm" th:text="${deck.description} ?: 'Aucune description'">Description du deck</p>
+
+                    <div class="flex flex-wrap gap-2 mt-4">
+                        <th:block th:switch="${entry.key}">
+                            <!-- Magic -->
+                            <span th:case="'Magic: The Gathering'"
+                                  class="badge"
+                                  th:classappend="${deck.format == 'Commander'} ? 'badge-secondary' : 'badge-accent'"
+                                  th:text="${deck.format}">Standard</span>
+
+                            <!-- Pokémon -->
+                            <span th:case="'Pokémon TCG'"
+                                  class="badge"
+                                  th:classappend="${deck.format == 'Expanded'} ? 'badge-secondary' : 'badge-accent'"
+                                  th:text="${deck.format}">Standard</span>
+
+                            <!-- Yu-Gi-Oh! -->
+                            <span th:case="'Yu-Gi-Oh!'"
+                                  class="badge"
+                                  th:classappend="${deck.format == 'Advanced'} ? 'badge-accent' : 'badge-secondary'"
+                                  th:text="${deck.format}">Advanced</span>
+
+                            <!-- Default -->
+                            <span th:case="*"
+                                  class="badge badge-accent"
+                                  th:text="${deck.format}">Format</span>
+                        </th:block>
+                    </div>
+
+                    <div class="flex items-center justify-between mt-4">
+                        <div class="flex gap-2">
+                            <a th:href="@{'/decks/' + ${deck.id}}" class="btn btn-sm btn-primary">
+                                <i class="fas fa-eye mr-1"></i> Voir
+                            </a>
+                            <button class="btn btn-sm btn-ghost">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div th:if="${entry.value.isEmpty()}" class="text-center py-8 bg-base-100 rounded-box shadow">
+            <i class="fas fa-cards text-4xl text-gray-300 mb-4"></i>
+            <h3 class="text-lg font-medium mb-2">Aucun deck pour ce jeu</h3>
+            <p class="text-gray-500 mb-4">Commencez par créer un nouveau deck</p>
+            <a th:href="@{'/decks/new?game=' + ${entry.key}}" class="btn btn-primary">
+                <i class="fas fa-plus mr-2"></i> Créer un deck
+            </a>
+        </div>
+    </div>
+
+    <!-- Empty State for All Games -->
+    <div th:if="${decksParJeu.isEmpty()}" class="text-center py-16 bg-base-100 rounded-box shadow">
+        <i class="fas fa-cards text-5xl text-gray-300 mb-6"></i>
+        <h2 class="text-2xl font-bold mb-4">Vous n'avez aucun deck</h2>
+        <p class="text-gray-500 mb-6">Commencez par créer votre premier deck</p>
+        <a th:href="@{/decks/new}" class="btn btn-primary btn-lg">
+            <i class="fas fa-plus mr-2"></i> Créer mon premier deck
+        </a>
+    </div>
+</main>
+
+<!-- Footer -->
+<footer class="footer p-10 bg-neutral text-neutral-content mt-12">
+    <div>
+            <span class="footer-title">
+                <i class="fas fa-cards text-primary mr-2"></i>
+                <span class="gradient-text font-bold">MultiDeck</span>
+            </span>
+        <p>La plateforme ultime pour les passionnés de jeux de cartes<br/>Depuis 2023</p>
+    </div>
+    <div>
+        <span class="footer-title">Jeux</span>
+        <a class="link link-hover">Magic: The Gathering</a>
+        <a class="link link-hover">Pokémon TCG</a>
+        <a class="link link-hover">Yu-Gi-Oh!</a>
+        <a class="link link-hover">Hearthstone</a>
+    </div>
+    <div>
+        <span class="footer-title">Communauté</span>
+        <a class="link link-hover">Decks populaires</a>
+        <a class="link link-hover">Tournois</a>
+        <a class="link link-hover">Guides</a>
+    </div>
+</footer>
+
+<!-- Scripts -->
+<script>
+    // Animation au scroll
+    document.addEventListener('DOMContentLoaded', function() {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate__animated', 'animate__fadeInUp');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.deck-card').forEach(card => {
+            observer.observe(card);
+        });
+    });
+</script>
 </body>
 </html>
