@@ -2,13 +2,16 @@ package com.dreams.azyl.gestion_de_deckbuilding_multijeu.dto;
 
 import com.dreams.azyl.gestion_de_deckbuilding_multijeu.model.enums.DeckStatut;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class DeckFormDto {
     private String name;
     private String format;
-    private List<String> selectedCardIds;
+    private List<String> selectedCardIds = new ArrayList<>();
     private DeckStatut statut;
+    private String description;
+
     public String getName() {
         return name;
     }
@@ -28,7 +31,6 @@ public class DeckFormDto {
     public List<String> getSelectedCardIds() {
         return selectedCardIds;
     }
-
     public void setSelectedCardIds(List<String> selectedCardIds) {
         this.selectedCardIds = selectedCardIds;
     }
@@ -41,5 +43,11 @@ public class DeckFormDto {
         this.statut = statut;
     }
 
+    public String getDescription() {
+        return description;
+    }
 
+    public void setDescription(String description) {
+        this.description = description;
+    }
 }

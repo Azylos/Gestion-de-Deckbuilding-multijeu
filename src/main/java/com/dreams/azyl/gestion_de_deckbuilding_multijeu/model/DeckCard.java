@@ -19,6 +19,10 @@ public class DeckCard implements Serializable {
     @Column(nullable = false)
     private int quantity;
 
+    @ManyToOne
+    @JoinColumn(name = "deck_id", nullable = false)
+    private Deck deck;
+
     public DeckCard() {
     }
 
@@ -52,5 +56,13 @@ public class DeckCard implements Serializable {
 
     public void setQuantity(int quantity) {
         this.quantity = quantity;
+    }
+
+    public Deck getDeck() {
+        return deck;
+    }
+
+    public void setDeck(Deck deck) {
+        this.deck = deck;
     }
 }

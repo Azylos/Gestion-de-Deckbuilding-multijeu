@@ -27,7 +27,7 @@ public class Deck implements Serializable {
     @ManyToOne
     private Utilisateur owner;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "deck")
     private List<DeckCard> cards = new ArrayList<>();
     private LocalDateTime createdAt;
 

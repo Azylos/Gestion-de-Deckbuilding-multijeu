@@ -13,6 +13,7 @@ public class DeckViewDto {
     private String thumbnailUrl;
     private List<String> types; // ex: ["Feu", "Électrik"]
     private String format;
+    private List<PokemonCardDto> cards;
 
     public DeckViewDto() {
     }
@@ -99,6 +100,14 @@ public class DeckViewDto {
 
     public void setFormat(String format) {
         this.format = format;
+    }
+
+    public List<PokemonCardDto> getCards() {
+        return cards;
+    }
+
+    public void setCards(List<PokemonCardDto> cards) {
+        this.cards = cards;
     }
 }
 

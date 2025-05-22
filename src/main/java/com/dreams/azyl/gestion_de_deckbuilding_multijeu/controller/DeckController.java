@@ -14,14 +14,20 @@ import com.dreams.azyl.gestion_de_deckbuilding_multijeu.service.PokemonApiClient
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/decks")
@@ -54,59 +60,118 @@ public class DeckController {
         return "decks/list";
     }
 
+    @GetMapping("/{deckId}")
+    public String voirDeck(@PathVariable Long deckId, Model model) {
+        Deck deck = deckRepository.findById(deckId).orElseThrow(() -> new IllegalArgumentException("Deck introuvable"));
+
+        DeckViewDto dto = deckViewMapper.toDeckView(deck);
+        model.addAttribute("deck", dto);
+        return "decks/view";
+    }
+
     @GetMapping("/new")
-    public String showDeckCreationForm(Model model, @PageableDefault(size = 20) Pageable pageable) {
-        List<PokemonCardDto> allCards = pokemonApiClient.getAllCards();
-        int pageSize = pageable.getPageSize();
-        int pageNumber = pageable.getPageNumber();
-        int totalCards = allCards.size();
+    public String showDeckCreationForm(Model model,
+                                       @PageableDefault(size = 20) Pageable pageable) {
 
-        int fromIndex = Math.min(pageNumber * pageSize, totalCards);
-        int toIndex = Math.min(fromIndex + pageSize, totalCards);
+        // 1) Créer et persister un deck brouillon avec un nom non-null
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Utilisateur user = utilisateurRepository.findByUsername(auth.getName())
+                .orElseThrow(() -> new IllegalStateException("Utilisateur introuvable"));
 
-        List<PokemonCardDto> cardsPage = allCards.subList(fromIndex, toIndex);
-        int totalPages = (int) Math.ceil((double) totalCards / pageSize);
+        Deck draft = new Deck();
+        draft.setName("Brouillon");           // ← **obligatoire**, même vide "" fonctionnerait
+        draft.setFormat("POKEMON");
+        draft.setStatut(DeckStatut.BROUILLON);
+        draft.setOwner(user);
+        draft.setCreatedAt(LocalDateTime.now());
+        deckRepository.save(draft);
 
-        model.addAttribute("deckForm", new DeckFormDto());
-        model.addAttribute("cards", cardsPage);
-        model.addAttribute("currentCardPage", pageNumber);
-        model.addAttribute("totalCardPages", totalPages);
+        // 2) Transmettre son ID pour l’AJAX
+        model.addAttribute("draftDeckId", draft.getId());
+
+        // 3) Pagination…
+        List<PokemonCardDto> all = pokemonApiClient.getAllCards();
+        int from = Math.min(pageable.getPageNumber() * pageable.getPageSize(), all.size());
+        int to   = Math.min(from + pageable.getPageSize(), all.size());
+        model.addAttribute("cards", all.subList(from, to));
+        model.addAttribute("currentCardPage", pageable.getPageNumber());
+        model.addAttribute("totalCardPages", (int)Math.ceil((double)all.size() / pageable.getPageSize()));
+
+        // 4) Initialisation du DeckFormDto (nom sera écrasé à la soumission)
+        DeckFormDto form = new DeckFormDto();
+        form.setFormat("POKEMON");
+        form.setStatut(DeckStatut.BROUILLON);
+        model.addAttribute("deckForm", form);
 
         return "decks/new";
     }
 
+    @PostMapping("/{deckId}/cards")
+    @ResponseBody
+    public ResponseEntity<?> addCardAjax(
+            @PathVariable Long deckId,
+            @RequestBody Map<String,String> payload) {
+
+        Deck deck = deckRepository.findById(deckId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Deck introuvable"));
+
+        // récupère apiId et crée le DeckCard
+        String apiId = payload.get("apiCardId");
+        PokemonCardDto dto = pokemonApiClient.getCardById(apiId);
+
+        DeckCard card = new DeckCard();
+        card.setApiCardId(dto.getId());
+        card.setName(dto.getName());
+        card.setQuantity(1);
+        card.setDeck(deck);
+
+        deck.getCards().add(card);
+        deckRepository.save(deck);
+
+        // renvoie l’objet créé (optionnel)
+        return ResponseEntity.ok(Map.of(
+                "cardId",      card.getApiCardId(),
+                "name",        card.getName(),
+                "quantity",    card.getQuantity()
+        ));
+    }
+
     @PostMapping("/new")
     public String saveNewDeck(@ModelAttribute("deckForm") DeckFormDto deckForm) {
-        // 1. Récupérer l'utilisateur connecté
+
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String username = auth.getName();
+        Utilisateur user = utilisateurRepository
+                .findByUsername(auth.getName())
+                .orElseThrow(() -> new IllegalStateException("Utilisateur introuvable"));
 
-        Utilisateur utilisateur = utilisateurRepository.findByUsername(username)
-                .orElseThrow(() -> new IllegalStateException("Utilisateur introuvable : " + username));
-
-        // 2. Créer et remplir le deck
         Deck deck = new Deck();
         deck.setName(deckForm.getName());
-        deck.setDescription(deckForm.getFormat()); // ← à adapter si ce champ est bien "format"
-        deck.setCreatedAt(LocalDateTime.now());
-        deck.setStatut(deckForm.getStatut());
-        deck.setOwner(utilisateur);
         deck.setFormat("POKEMON");
+        deck.setStatut(deckForm.getStatut());     // BROUILLON ou PUBLIE
+        deck.setOwner(user);
+        deck.setCreatedAt(LocalDateTime.now());
+        // si vous tenez à la description, mappez-la aussi : deck.setDescription(...);
 
-        List<DeckCard> cards = deckForm.getSelectedCardIds().stream().map(cardId -> {
-            PokemonCardDto cardDto = pokemonApiClient.getCardById(cardId);
-            DeckCard deckCard = new DeckCard();
-            deckCard.setApiCardId(cardDto.getId());
-            deckCard.setName(cardDto.getName());
-            deckCard.setQuantity(1); // à ajuster si tu gères les quantités
-            return deckCard;
+        // Groupe les IDs pour créer les DeckCard avec la bonne quantité
+        Map<String, Long> counts = deckForm.getSelectedCardIds().stream()
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+
+        List<DeckCard> cards = counts.entrySet().stream().map(e -> {
+            String apiId = e.getKey();
+            int qty    = e.getValue().intValue();
+            PokemonCardDto dto = pokemonApiClient.getCardById(apiId);
+            DeckCard dc = new DeckCard();
+            dc.setApiCardId(dto.getId());
+            dc.setName(dto.getName());
+            dc.setQuantity(qty);
+            dc.setDeck(deck);
+            return dc;
         }).toList();
 
         deck.setCards(cards);
 
-        // 3. Sauvegarder
         deckRepository.save(deck);
-
         return "redirect:/decks";
     }
 

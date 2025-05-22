@@ -1,112 +1,137 @@
-    <!DOCTYPE html>
-    <html xmlns:th="http://www.thymeleaf.org" lang="fr">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Sélection de Cartes - Pokémon TCG</title>
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- pour fetch CSRF automatiquement -->
+    <meta name="_csrf"       th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <title>Sélection de Cartes - MultiDeck</title>
 
-        <!-- DaisyUI via CDN -->
-        <link href="https://cdn.jsdelivr.net/npm/daisyui@3.9.4/dist/full.css" rel="stylesheet" type="text/css" />
-        <script src="https://cdn.tailwindcss.com"></script>
+    <!-- DaisyUI via CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@3.9.4/dist/full.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
 
-        <!-- Font Awesome pour les icônes -->
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Font Awesome pour les icônes -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-        <style>
-            .gradient-text {
-                background: linear-gradient(90deg, #FF0000, #FFCC00);
-                -webkit-background-clip: text;
-                background-clip: text;
-                color: transparent;
-            }
+    <!-- Animation CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
 
-            .card-hover {
-                transition: all 0.2s ease;
-                transform-origin: center;
-            }
+    <style>
+        .gradient-text {
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
 
-            .card-hover:hover {
-                transform: scale(1.05) translateY(-5px);
-                z-index: 10;
-            }
+        .card-hover {
+            transition: all 0.2s ease;
+            transform-origin: center;
+        }
 
-            .selected-card {
-                box-shadow: 0 0 0 3px #3b82f6;
-                transform: scale(1.03);
-            }
+        .card-hover:hover {
+            transform: scale(1.05) translateY(-5px);
+            z-index: 10;
+        }
 
-            .type-badge {
-                padding: 0.25rem 0.5rem;
-                border-radius: 9999px;
-                font-size: 0.75rem;
-                font-weight: 600;
-                text-transform: uppercase;
-            }
+        .selected-card {
+            box-shadow: 0 0 0 3px #3b82f6;
+            transform: scale(1.03);
+        }
 
-            .progress-bar {
-                height: 10px;
-                border-radius: 5px;
-                transition: width 0.3s ease;
-            }
+        .type-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
 
-            .energy-icon {
-                width: 24px;
-                height: 24px;
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                border-radius: 50%;
-                font-weight: bold;
-                font-size: 0.75rem;
-            }
-        </style>
-    </head>
-    <body class="min-h-screen bg-gray-100">
-    <!-- Header -->
-    <header class="bg-gradient-to-r from-red-600 to-yellow-400 shadow-lg">
-        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
-            <div class="flex items-center">
-                <img src="https://images.pokemontcg.io/logo.png" alt="Pokémon TCG" class="h-10 mr-3">
-                <h1 class="text-2xl font-bold text-white">Constructeur de Deck</h1>
-            </div>
-            <div class="flex items-center space-x-4">
-                <button class="btn btn-ghost text-white">
-                    <i class="fas fa-save mr-2"></i> Sauvegarder
-                </button>
-                <button class="btn btn-ghost text-white">
-                    <i class="fas fa-question-circle mr-2"></i> Aide
-                </button>
-            </div>
+        .progress-bar {
+            height: 10px;
+            border-radius: 5px;
+            transition: width 0.3s ease;
+        }
+
+        .energy-icon {
+            width: 24px;
+            height: 24px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-weight: bold;
+            font-size: 0.75rem;
+        }
+
+        .pokemon-bg {
+            background-image: url('https://images.pokemontcg.io/base1/logo.png');
+            background-size: 30%;
+            background-position: right bottom;
+            background-repeat: no-repeat;
+            background-blend-mode: overlay;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-base-200">
+<!-- Navigation -->
+<nav class="navbar bg-base-100 shadow-lg sticky top-0 z-50">
+    <div class="flex-1">
+        <a th:href="@{/}" class="btn btn-ghost normal-case text-xl">
+            <i class="fas fa-cards text-primary mr-2"></i>
+            <span class="gradient-text font-bold">MultiDeck</span>
+        </a>
+    </div>
+    <div class="flex-none gap-2">
+        <button class="btn btn-primary">
+            <i class="fas fa-save mr-2"></i> Sauvegarder
+        </button>
+        <div class="dropdown dropdown-end">
+            <label tabindex="0" class="btn btn-ghost btn-circle avatar">
+                <div class="w-10 rounded-full bg-primary text-white flex items-center justify-center">
+                    <i class="fas fa-user text-xl"></i>
+                </div>
+            </label>
+            <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
+                <li><a>Profil</a></li>
+                <li><a th:href="@{/decks}">Mes Decks</a></li>
+                <li><a th:href="@{/logout}">Déconnexion</a></li>
+            </ul>
         </div>
-    </header>
+    </div>
+</nav>
 
-    <!-- Main Content -->
-    <main class="container mx-auto px-4 py-6">
-        <form th:action="@{/decks/new}" method="post" th:object="${deckForm}">
-            <!-- Deck Info & Progress -->
-            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
-                    <div>
-                        <h2 class="text-xl font-bold mb-2">Nouveau Deck Pokémon</h2>
-                        <div class="flex items-center space-x-4">
-                            <div class="form-control">
-                                <label class="label">
-                                    <span class="label-text">Nom du Deck</span>
-                                </label>
-                                <input type="text" th:field="*{name}" placeholder="Mon super deck" class="input input-bordered w-full max-w-xs" />
-                            </div>
-                            <div class="form-control">
-                                <label class="label">
-                                    <span class="label-text">Format</span>
-                                </label>
-                                <select th:field="*{format}" class="select select-bordered">
-                                    <option value="Standard">Standard</option>
-                                    <option value="Expanded">Expanded</option>
-                                    <option value="Legacy">Legacy</option>
-                                </select>
-                            </div>
+<!-- Main Content -->
+<main class="container mx-auto px-4 py-6">
+    <form th:action="@{/decks/new}" method="post" th:object="${deckForm}">
+        <!-- on a besoin du draftDeckId pour l’AJAX -->
+        <input type="hidden" id="draft-deck-id" th:value="${draftDeckId}"/>
+
+        <!-- Deck Info & Progress -->
+        <div class="bg-base-100 rounded-box shadow-lg p-6 mb-6 pokemon-bg">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
+                <div>
+                    <div class="flex items-center mb-2">
+                        <img src="https://images.pokemontcg.io/logo.png" alt="Pokémon TCG" class="h-10 mr-3">
+                        <h2 class="text-2xl font-bold">Nouveau Deck Pokémon</h2>
+                    </div>
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text font-semibold">Nom du Deck</span>
+                            </label>
+                            <input type="text" th:field="*{name}" placeholder="Mon super deck" class="input input-bordered w-full" />
+                        </div>
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text font-semibold">Format</span>
+                            </label>
+                            <input type="hidden" th:field="*{format}" />
                         </div>
                     </div>
+                </div>
 
                 <div class="stats shadow mt-4 md:mt-0">
                     <div class="stat">
@@ -129,7 +154,7 @@
                         <span class="font-medium">Pokémon (<span id="pokemon-count">0</span>/max 20)</span>
                         <span class="text-sm">20 maximum</span>
                     </div>
-                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                    <div class="w-full bg-base-200 rounded-full h-2.5">
                         <div id="pokemon-progress" class="progress-bar bg-red-500 h-2.5 rounded-full" style="width: 0%"></div>
                     </div>
                 </div>
@@ -139,7 +164,7 @@
                         <span class="font-medium">Dresseur (<span id="trainer-count">0</span>/pas de limite)</span>
                         <span class="text-sm">Recommandé: 15-20</span>
                     </div>
-                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                    <div class="w-full bg-base-200 rounded-full h-2.5">
                         <div id="trainer-progress" class="progress-bar bg-blue-500 h-2.5 rounded-full" style="width: 0%"></div>
                     </div>
                 </div>
@@ -149,7 +174,7 @@
                         <span class="font-medium">Énergie (<span id="energy-count">0</span>/pas de limite)</span>
                         <span class="text-sm">Recommandé: 10-15</span>
                     </div>
-                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                    <div class="w-full bg-base-200 rounded-full h-2.5">
                         <div id="energy-progress" class="progress-bar bg-yellow-500 h-2.5 rounded-full" style="width: 0%"></div>
                     </div>
                 </div>
@@ -160,7 +185,7 @@
         <div class="flex flex-col lg:flex-row gap-6">
             <!-- Card Collection -->
             <div class="lg:w-2/3">
-                <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="bg-base-100 rounded-box shadow-lg p-6">
                     <div class="flex justify-between items-center mb-6">
                         <h3 class="text-lg font-bold">Collection de Cartes</h3>
 
@@ -195,20 +220,36 @@
                     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4" id="card-collection">
                         <!-- Sample Pokémon Card -->
                         <div th:each="card : ${cards}"
-                             class="card card-compact bg-base-100 shadow-md card-hover relative"
+                             class="card card-compact bg-base-100 shadow-md card-hover animate__animated animate__fadeIn relative"
                              th:attr="data-type=${card.supertype.toLowerCase()}, data-card-id=${card.id}">
-
                             <figure class="px-4 pt-4">
                                 <img th:src="${card.imageUrl}" th:alt="${card.name}" class="rounded-xl h-40 w-full object-contain" />
                             </figure>
-
                             <div class="card-body p-4">
                                 <div class="flex justify-between items-start">
                                     <h4 class="card-title text-sm" th:text="${card.name}">Nom</h4>
-                                    <span class="type-badge bg-gray-200 text-gray-800" th:text="${card.supertype}">Type</span>
+<!--                                    <th:block th:if="${card.supertype == 'Pokémon'}">-->
+<!--                                            <span class="type-badge"-->
+<!--                                                  th:classappend="${card.types[0] == 'Fire'} ? 'bg-red-100 text-red-800' :-->
+<!--                                                                (${card.types[0] == 'Water'} ? 'bg-blue-100 text-blue-800' :-->
+<!--                                                                (${card.types[0] == 'Grass'} ? 'bg-green-100 text-green-800' :-->
+<!--                                                                (${card.types[0] == 'Lightning'} ? 'bg-yellow-100 text-yellow-800' :-->
+<!--                                                                (${card.types[0] == 'Psychic'} ? 'bg-purple-100 text-purple-800' :-->
+<!--                                                                (${card.types[0] == 'Fighting'} ? 'bg-orange-100 text-orange-800' :-->
+<!--                                                                (${card.types[0] == 'Darkness'} ? 'bg-gray-700 text-white' :-->
+<!--                                                                (${card.types[0] == 'Metal'} ? 'bg-gray-400 text-gray-800' :-->
+<!--                                                                'bg-pink-100 text-pink-800')))))))"-->
+<!--                                                  th:text="${card.types[0]}">Type</span>-->
+<!--                                    </th:block>-->
+                                    <th:block th:if="${card.supertype == 'Trainer'}">
+                                        <span class="type-badge bg-purple-100 text-purple-800">Dresseur</span>
+                                    </th:block>
+                                    <th:block th:if="${card.supertype == 'Energy'}">
+                                        <span class="type-badge bg-yellow-100 text-yellow-800">Énergie</span>
+                                    </th:block>
                                 </div>
                                 <div class="flex justify-end mt-2">
-                                    <button class="btn btn-sm btn-primary add-card-btn">
+                                    <button type="button" class="btn btn-sm btn-primary add-card-btn">
                                         <i class="fas fa-plus"></i>
                                     </button>
                                 </div>
@@ -217,18 +258,22 @@
                     </div>
 
                     <!-- Pagination -->
-                    <a th:each="i : ${#numbers.sequence(0, totalCardPages - 1)}"
-                       th:href="@{/decks/new(page=${i})}"
-                       th:text="${i + 1}"
-                       th:classappend="${i == currentCardPage} ? 'btn-active' : ''"
-                       class="btn join-item">
-                    </a>
+                    <div class="flex justify-center mt-6">
+                        <div class="join">
+                            <a th:each="i : ${#numbers.sequence(0, totalCardPages - 1)}"
+                               th:href="@{/decks/new(page=${i})}"
+                               th:text="${i + 1}"
+                               th:classappend="${i == currentCardPage} ? 'btn-active' : ''"
+                               class="btn join-item">
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <!-- Selected Cards -->
             <div class="lg:w-1/3">
-                <div class="bg-white rounded-lg shadow-md p-6 sticky top-4">
+                <div class="bg-base-100 rounded-box shadow-lg p-6 sticky top-4">
                     <h3 class="text-lg font-bold mb-4">Votre Deck</h3>
 
                     <!-- Energy Type Distribution -->
@@ -253,7 +298,6 @@
                         <div>
                             <h4 class="font-bold text-red-600 mb-2">Pokémon (<span id="deck-pokemon-count">0</span>)</h4>
                             <div class="space-y-2" id="pokemon-list">
-                                <!-- Cards would be added here dynamically -->
                                 <div class="text-sm text-gray-500">Aucun Pokémon sélectionné</div>
                             </div>
                         </div>
@@ -275,11 +319,8 @@
                         </div>
                     </div>
 
-                    <!-- Champ caché pour envoyer les IDs -->
-                    <input type="hidden" name="selectedCardIds" id="selectedCardIds"/>
-
                     <!-- Validation -->
-                    <div class="mt-6 p-4 bg-gray-50 rounded-lg">
+                    <div class="mt-6 p-4 bg-base-200 rounded-lg">
                         <div class="flex items-center mb-2">
                             <i class="fas fa-check-circle text-green-500 mr-2"></i>
                             <span>Minimum 60 cartes</span>
@@ -290,207 +331,305 @@
                             <span>Maximum 4 cartes identiques</span>
                             <span class="ml-auto font-medium" id="validation-duplicates">OK</span>
                         </div>
-                        <div class="flex items-center">
+                        <div class="flex items-center mb-4">
                             <i class="fas fa-check-circle text-green-500 mr-2"></i>
                             <span>Maximum 20 Pokémon</span>
                             <span class="ml-auto font-medium"><span id="validation-pokemon-count">0</span>/20</span>
                         </div>
 
-                        <input type="hidden" name="status" id="deck-status" value="BROUILLON" />
+                        <input type="hidden" th:field="*{statut}" id="deck-status"/>
 
-                        <!-- Boutons avec JS pour modifier le champ hidden -->
-                        <button type="submit" class="btn btn-secondary" onclick="document.getElementById('deck-status').value='BROUILLON'">
-                            Enregistrer en Brouillon
-                        </button>
-
-                        <button type="submit" class="btn btn-primary" onclick="document.getElementById('deck-status').value='PUBLIE'">
-                            Publier le Deck
-                        </button>
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            <button type="submit"
+                                    class="btn btn-secondary"
+                                    onclick="document.getElementById('deck-status').value='BROUILLON'">
+                                Enregistrer Brouillon
+                            </button>
+                            <button type="submit"
+                                    class="btn btn-primary"
+                                    onclick="document.getElementById('deck-status').value='PUBLIE'">
+                                Publier le Deck
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-        </form>
-    </main>
+        <!-- conteneur pour les inputs cachés -->
+        <div id="selectedCardInputs"></div>
+    </form>
+</main>
 
-    <!-- Scripts -->
-    <script>
-        // Deck state
-        const deck = {
-            pokemon: [],
-            trainer: [],
-            energy: [],
-            cardCount: 0
-        };
+<!-- Footer -->
+<footer class="footer p-10 bg-neutral text-neutral-content mt-12">
+    <div>
+            <span class="footer-title">
+                <i class="fas fa-cards text-primary mr-2"></i>
+                <span class="gradient-text font-bold">MultiDeck</span>
+            </span>
+        <p>La plateforme ultime pour les passionnés de jeux de cartes<br/>Depuis 2023</p>
+    </div>
+    <div>
+        <span class="footer-title">Jeux</span>
+        <a class="link link-hover">Magic: The Gathering</a>
+        <a class="link link-hover">Pokémon TCG</a>
+        <a class="link link-hover">Yu-Gi-Oh!</a>
+        <a class="link link-hover">Hearthstone</a>
+    </div>
+    <div>
+        <span class="footer-title">Communauté</span>
+        <a class="link link-hover">Decks populaires</a>
+        <a class="link link-hover">Tournois</a>
+        <a class="link link-hover">Guides</a>
+    </div>
+</footer>
 
-        // Update counters
-        function updateCounters() {
-            // Update main counters
-            document.getElementById('card-count').textContent = deck.cardCount;
-            document.getElementById('pokemon-count').textContent = deck.pokemon.length;
-            document.getElementById('trainer-count').textContent = deck.trainer.length;
-            document.getElementById('energy-count').textContent = deck.energy.length;
+<!-- Scripts -->
+<script>
+    // Récupération CSRF et draftDeckId
+    const csrfToken  = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+    const draftDeckId = document.getElementById('draft-deck-id').value;
 
-            // Update progress bars
-            document.getElementById('pokemon-progress').style.width = `${Math.min(100, (deck.pokemon.length / 20) * 100)}%`;
-            document.getElementById('trainer-progress').style.width = `${Math.min(100, (deck.trainer.length / 30) * 100)}%`;
-            document.getElementById('energy-progress').style.width = `${Math.min(100, (deck.energy.length / 20) * 100)}%`;
+    // État du deck côté client
+    const deck = {
+        pokemon: [],
+        trainer: [],
+        energy: [],
+        cardCount: 0
+    };
 
-            // Update deck list counters
-            document.getElementById('deck-pokemon-count').textContent = deck.pokemon.length;
-            document.getElementById('deck-trainer-count').textContent = deck.trainer.length;
-            document.getElementById('deck-energy-count').textContent = deck.energy.length;
+    // Met à jour tous les compteurs et recrée les inputs cachés pour Spring
+    function updateCounters() {
+        document.getElementById('card-count').textContent      = deck.cardCount;
+        document.getElementById('pokemon-count').textContent   = deck.pokemon.length;
+        document.getElementById('trainer-count').textContent   = deck.trainer.length;
+        document.getElementById('energy-count').textContent    = deck.energy.length;
 
-            // Update validation section
-            document.getElementById('validation-card-count').textContent = deck.cardCount;
-            document.getElementById('validation-pokemon-count').textContent = deck.pokemon.length;
+        document.getElementById('pokemon-progress').style.width = `${Math.min(100, (deck.pokemon.length / 20) * 100)}%`;
+        document.getElementById('trainer-progress').style.width = `${Math.min(100, (deck.trainer.length / 30) * 100)}%`;
+        document.getElementById('energy-progress').style.width = `${Math.min(100, (deck.energy.length / 20) * 100)}%`;
 
-            const selectedIds = [
-                ...deck.pokemon.map(c => c.id),
-                ...deck.trainer.map(c => c.id),
-                ...deck.energy.map(c => c.id)
-            ];
-            document.getElementById("selectedCardIds").value = selectedIds.join(",");
+        document.getElementById('deck-pokemon-count').textContent  = deck.pokemon.length;
+        document.getElementById('deck-trainer-count').textContent  = deck.trainer.length;
+        document.getElementById('deck-energy-count').textContent   = deck.energy.length;
 
-            // Enable/disable validate button
-            const validateBtn = document.getElementById('validate-deck');
-            validateBtn.disabled = deck.cardCount < 60 || deck.pokemon.length > 20;
+        document.getElementById('validation-card-count').textContent   = deck.cardCount;
+        document.getElementById('validation-pokemon-count').textContent = deck.pokemon.length;
+
+        // Dupes max 4
+        const allCards = [...deck.pokemon, ...deck.trainer, ...deck.energy];
+        const counts = {};
+        let dup = false;
+        allCards.forEach(c => {
+            counts[c.name] = (counts[c.name] || 0) + 1;
+            if (counts[c.name] > 4) dup = true;
+        });
+        const dupEl = document.getElementById('validation-duplicates');
+        dupEl.textContent = dup ? "Trop de copies" : "OK";
+        dupEl.className   = dup ? "text-error" : "text-success";
+
+        // Recréation des inputs cachés pour Spring MVC
+        const container = document.getElementById("selectedCardInputs");
+        container.innerHTML = "";
+        allCards.map(c => c.id).forEach(id => {
+            const inp = document.createElement("input");
+            inp.type  = "hidden";
+            inp.name  = "selectedCardIds";
+            inp.value = id;
+            container.appendChild(inp);
+        });
+    }
+
+    // Met à jour l'affichage des listes Pokémon / Trainer / Énergie
+    function updateDeckList() {
+        const pokemonList = document.getElementById('pokemon-list');
+        const trainerList = document.getElementById('trainer-list');
+        const energyList  = document.getElementById('energy-list');
+
+        // Vide
+        pokemonList.innerHTML = '';
+        trainerList.innerHTML = '';
+        energyList.innerHTML  = '';
+
+        // Pokémon
+        if (deck.pokemon.length === 0) {
+            pokemonList.innerHTML = '<div class="text-sm text-gray-500">Aucun Pokémon sélectionné</div>';
+        } else {
+            groupCardsByName(deck.pokemon).forEach(p => {
+                const item = document.createElement('div');
+                item.className = 'flex items-center justify-between p-2 bg-red-50 rounded';
+                item.innerHTML = `
+          <div class="flex items-center">
+            <img src="${p.image}" class="w-10 h-10 object-contain mr-2" />
+            <div>
+              <div class="text-sm font-medium">${p.name}</div>
+              <div class="text-xs text-gray-500">${p.count}x</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-1">
+            <button class="btn btn-xs btn-error remove-card-btn" data-name="${p.name}" data-type="pokemon">
+              <i class="fas fa-minus"></i>
+            </button>
+            <button class="btn btn-xs btn-primary add-card-btn" data-name="${p.name}" data-type="pokemon">
+              <i class="fas fa-plus"></i>
+            </button>
+          </div>
+        `;
+                pokemonList.appendChild(item);
+            });
         }
 
-        // Add card to deck
-        document.querySelectorAll('.add-card-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const cardElement = this.closest('.card');
-                const cardType = cardElement.dataset.type;
-                const cardName = cardElement.querySelector('.card-title').textContent;
-                const cardImage = cardElement.querySelector('img').src;
-                const cardEnergy = cardElement.dataset.energy || '';
-                const cardId = cardElement.dataset.cardId || ""; // tu dois le mettre dans tes cards
-                const card = { id: cardId, name: cardName, image: cardImage, energy: cardEnergy };
-
-
-                // Check if we can add more of this type
-                if (cardType === 'pokemon' && deck.pokemon.length >= 20) {
-                    alert('Vous ne pouvez pas ajouter plus de 20 Pokémon dans un deck.');
-                    return;
-                }
-
-                // Check if we've reached 60 cards
-                if (deck.cardCount >= 60) {
-                    alert('Un deck ne peut pas contenir plus de 60 cartes.');
-                    return;
-                }
-
-                if (cardType === 'pokemon') {
-                    deck.pokemon.push(card);
-                } else if (cardType === 'trainer') {
-                    deck.trainer.push(card);
-                } else if (cardType === 'energy') {
-                    deck.energy.push(card);
-                }
-
-                deck.cardCount++;
-                updateCounters();
-                updateDeckList();
+        // Trainer
+        if (deck.trainer.length === 0) {
+            trainerList.innerHTML = '<div class="text-sm text-gray-500">Aucune carte Dresseur sélectionnée</div>';
+        } else {
+            groupCardsByName(deck.trainer).forEach(t => {
+                const item = document.createElement('div');
+                item.className = 'flex items-center justify-between p-2 bg-blue-50 rounded';
+                item.innerHTML = `
+          <div class="flex items-center">
+            <img src="${t.image}" class="w-10 h-10 object-contain mr-2" />
+            <div>
+              <div class="text-sm font-medium">${t.name}</div>
+              <div class="text-xs text-gray-500">${t.count}x</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-1">
+            <button class="btn btn-xs btn-error remove-card-btn" data-name="${t.name}" data-type="trainer">
+              <i class="fas fa-minus"></i>
+            </button>
+            <button class="btn btn-xs btn-primary add-card-btn" data-name="${t.name}" data-type="trainer">
+              <i class="fas fa-plus"></i>
+            </button>
+          </div>
+        `;
+                trainerList.appendChild(item);
             });
-        });
+        }
 
-        // Update deck list display
-        function updateDeckList() {
-            const pokemonList = document.getElementById('pokemon-list');
-            const trainerList = document.getElementById('trainer-list');
-            const energyList = document.getElementById('energy-list');
+        // Énergie
+        if (deck.energy.length === 0) {
+            energyList.innerHTML = '<div class="text-sm text-gray-500">Aucune carte Énergie sélectionnée</div>';
+        } else {
+            groupCardsByName(deck.energy).forEach(e => {
+                const item = document.createElement('div');
+                item.className = 'flex items-center justify-between p-2 bg-yellow-50 rounded';
+                item.innerHTML = `
+          <div class="flex items-center">
+            <img src="${e.image}" class="w-10 h-10 object-contain mr-2" />
+            <div>
+              <div class="text-sm font-medium">${e.name}</div>
+              <div class="text-xs text-gray-500">${e.count}x</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-1">
+            <button class="btn btn-xs btn-error remove-card-btn" data-name="${e.name}" data-type="energy">
+              <i class="fas fa-minus"></i>
+            </button>
+            <button class="btn btn-xs btn-primary add-card-btn" data-name="${e.name}" data-type="energy">
+              <i class="fas fa-plus"></i>
+            </button>
+          </div>
+        `;
+                energyList.appendChild(item);
+            });
+        }
 
-            // Clear lists
-            pokemonList.innerHTML = '';
-            trainerList.innerHTML = '';
-            energyList.innerHTML = '';
-
-            // Add Pokémon
-            if (deck.pokemon.length === 0) {
-                pokemonList.innerHTML = '<div class="text-sm text-gray-500">Aucun Pokémon sélectionné</div>';
-            } else {
-                deck.pokemon.forEach(pokemon => {
-                    const item = document.createElement('div');
-                    item.className = 'flex items-center justify-between p-2 bg-red-50 rounded';
-                    item.innerHTML = `
-                            <div class="flex items-center">
-                                <img src="${pokemon.image}" class="w-10 h-10 object-contain mr-2" />
-                                <span class="text-sm">${pokemon.name}</span>
-                            </div>
-                            <button class="btn btn-xs btn-error remove-card-btn">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        `;
-                    pokemonList.appendChild(item);
-                });
-            }
-
-            // Add Trainers
-            if (deck.trainer.length === 0) {
-                trainerList.innerHTML = '<div class="text-sm text-gray-500">Aucune carte Dresseur sélectionnée</div>';
-            } else {
-                deck.trainer.forEach(trainer => {
-                    const item = document.createElement('div');
-                    item.className = 'flex items-center justify-between p-2 bg-blue-50 rounded';
-                    item.innerHTML = `
-                            <div class="flex items-center">
-                                <img src="${trainer.image}" class="w-10 h-10 object-contain mr-2" />
-                                <span class="text-sm">${trainer.name}</span>
-                            </div>
-                            <button class="btn btn-xs btn-error remove-card-btn">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        `;
-                    trainerList.appendChild(item);
-                });
-            }
-
-            // Add Energy
-            if (deck.energy.length === 0) {
-                energyList.innerHTML = '<div class="text-sm text-gray-500">Aucune carte Énergie sélectionnée</div>';
-            } else {
-                deck.energy.forEach(energy => {
-                    const item = document.createElement('div');
-                    item.className = 'flex items-center justify-between p-2 bg-yellow-50 rounded';
-                    item.innerHTML = `
-                            <div class="flex items-center">
-                                <img src="${energy.image}" class="w-10 h-10 object-contain mr-2" />
-                                <span class="text-sm">${energy.name}</span>
-                            </div>
-                            <button class="btn btn-xs btn-error remove-card-btn">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        `;
-                    energyList.appendChild(item);
-                });
-            }
-
-            // Add event listeners to remove buttons
-            document.querySelectorAll('.remove-card-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const cardName = this.closest('div').querySelector('span').textContent;
-                    const cardType = this.closest('div').parentElement.id.replace('-list', '');
-
-                    // Remove from appropriate array
-                    if (cardType === 'pokemon') {
-                        deck.pokemon = deck.pokemon.filter(card => card.name !== cardName);
-                    } else if (cardType === 'trainer') {
-                        deck.trainer = deck.trainer.filter(card => card.name !== cardName);
-                    } else if (cardType === 'energy') {
-                        deck.energy = deck.energy.filter(card => card.name !== cardName);
-                    }
-
+        // remove handlers
+        document.querySelectorAll('.remove-card-btn').forEach(btn => {
+            btn.onclick = () => {
+                const name = btn.dataset.name, type = btn.dataset.type;
+                let arr = type === 'pokemon' ? deck.pokemon
+                    : type === 'trainer' ? deck.trainer
+                        : deck.energy;
+                const idx = arr.findIndex(c => c.name === name);
+                if (idx >= 0) {
+                    arr.splice(idx, 1);
                     deck.cardCount--;
                     updateCounters();
                     updateDeckList();
-                });
-            });
+                }
+            };
+        });
+    }
+
+    // Regroupe par nom et compte les occurrences
+    function groupCardsByName(cards) {
+        const map = {};
+        cards.forEach(c => {
+            if (!map[c.name]) {
+                map[c.name] = { name: c.name, image: c.image, energy: c.energy, count: 0 };
+            }
+            map[c.name].count++;
+        });
+        return Object.values(map);
+    }
+
+    // Clic sur “+” : AJAX + update UI
+    document.addEventListener('click', async e => {
+        const btn = e.target.closest('.add-card-btn');
+        if (!btn) return;
+
+        const cardEl    = btn.closest('.card');
+        const type      = cardEl.dataset.type;
+        const name      = cardEl.querySelector('.card-title').textContent;
+        const img       = cardEl.querySelector('img').src;
+        const apiCardId = cardEl.dataset.cardId;
+        const energy    = cardEl.querySelector('.type-badge')?.textContent || '';
+
+        // règles métier locales
+        if (type === 'pokemon' && deck.pokemon.length >= 20) {
+            return alert('Max 20 Pokémon.');
+        }
+        if (deck.cardCount >= 60) {
+            return alert('Max 60 cartes.');
+        }
+        if ([...deck.pokemon, ...deck.trainer, ...deck.energy].filter(c => c.name === name).length >= 4) {
+            return alert('Max 4 exemplaires.');
         }
 
-        // Initialize
+        // AJAX persist
+        try {
+            const res = await fetch(`/decks/${draftDeckId}/cards`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    [csrfHeader]: csrfToken
+                },
+                body: JSON.stringify({ apiCardId })
+            });
+            if (!res.ok) throw new Error(res.statusText);
+        } catch (err) {
+            console.error(err);
+            return alert("Erreur d'enregistrement.");
+        }
+
+        // mise à jour locale + UI
+        const card = { id: apiCardId, name, image: img, energy };
+        if (type === 'pokemon') deck.pokemon.push(card);
+        else if (type === 'trainer') deck.trainer.push(card);
+        else deck.energy.push(card);
+
+        deck.cardCount++;
         updateCounters();
         updateDeckList();
-    </script>
-    </body>
-    </html>
+    });
+
+    // Initialisation
+    updateCounters();
+    updateDeckList();
+
+    // Animation au scroll (optionnel)
+    document.addEventListener('DOMContentLoaded', () => {
+        const obs = new IntersectionObserver(entries => {
+            entries.forEach(e => {
+                if (e.isIntersecting) e.target.classList.add('animate__animated','animate__fadeInUp');
+            });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.card').forEach(c => obs.observe(c));
+    });
+</script>
+
+</body>
+</html>
