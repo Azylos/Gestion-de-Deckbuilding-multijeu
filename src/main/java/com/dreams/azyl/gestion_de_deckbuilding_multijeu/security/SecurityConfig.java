@@ -48,7 +48,7 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/", "/decks", "/decks/**",
+                                "/", "/decks", "/decks/**","/decks/*/view2",
                                 "/inscription", "/css/**", "/js/**", "/images/**"
                         ).permitAll()
                         .anyRequest().authenticated()

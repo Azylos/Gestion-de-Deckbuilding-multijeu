@@ -70,6 +70,19 @@ public class DeckController {
         return "decks/view";
     }
 
+    @GetMapping("/{deckId}/view2")
+    public String view2Page(@PathVariable Long deckId, Model model) {
+        Deck deck = deckRepository.findById(deckId)
+                .orElseThrow(() -> new IllegalArgumentException("Deck introuvable"));
+
+        DeckViewDto dto = deckViewMapper.toDeckView(deck);
+        model.addAttribute("deck", dto);
+
+        return "decks/view2";
+    }
+
+
+
     @GetMapping("/new")
     public String showDeckCreationForm(@RequestParam(name="draftDeckId", required=false) Long draftDeckId, Model model, @PageableDefault(size = 20) Pageable pageable) {
         Deck draft;

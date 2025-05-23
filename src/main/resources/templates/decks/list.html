@@ -186,7 +186,7 @@
                         <i class="far fa-eye mr-1"></i>
                         <span th:text="${deck.views}">123</span>
                     </button>
-                    <a th:href="@{'/decks/pokemon/' + ${deck.id}}" class="btn btn-sm btn-primary">
+                    <a th:href="@{'/decks/' + ${deck.id} + '/view2'}" class="btn btn-sm btn-primary">
                         Voir le deck <i class="fas fa-arrow-right ml-1"></i>
                     </a>
                 </div>
