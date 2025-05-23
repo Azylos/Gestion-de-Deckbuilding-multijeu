@@ -69,35 +69,39 @@ public class DeckController {
         return "decks/view";
     }
 
-    //TODO: quand change pagination créer d'autre deck
     @GetMapping("/new")
-    public String showDeckCreationForm(Model model, @PageableDefault(size = 20) Pageable pageable) {
+    public String showDeckCreationForm(@RequestParam(name="draftDeckId", required=false) Long draftDeckId, Model model, @PageableDefault(size = 20) Pageable pageable) {
+        Deck draft;
+        if (draftDeckId != null) {
+            // récupère l’existant
+            draft = deckRepository.findById(draftDeckId)
+                    .orElseThrow(() -> new IllegalArgumentException("Draft introuvable : " + draftDeckId));
+        } else {
+            // crée un nouveau brouillon
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            Utilisateur user = utilisateurRepository.findByUsername(auth.getName())
+                    .orElseThrow(() -> new IllegalStateException("Utilisateur introuvable"));
+            draft = new Deck();
+            draft.setName("Brouillon");
+            draft.setFormat("POKEMON");
+            draft.setStatut(DeckStatut.BROUILLON);
+            draft.setOwner(user);
+            draft.setCreatedAt(LocalDateTime.now());
+            deckRepository.save(draft);
+        }
 
-        // 1) Créer et persister un deck brouillon avec un nom non-null
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        Utilisateur user = utilisateurRepository.findByUsername(auth.getName())
-                .orElseThrow(() -> new IllegalStateException("Utilisateur introuvable"));
-
-        Deck draft = new Deck();
-        draft.setName("Brouillon");           // ← **obligatoire**, même vide "" fonctionnerait
-        draft.setFormat("POKEMON");
-        draft.setStatut(DeckStatut.BROUILLON);
-        draft.setOwner(user);
-        draft.setCreatedAt(LocalDateTime.now());
-        deckRepository.save(draft);
-
-        // 2) Transmettre son ID pour l’AJAX
+        // 2) transmet toujours l’ID du brouillon
         model.addAttribute("draftDeckId", draft.getId());
 
-        // 3) Pagination…
+        // 3) pagination comme avant, cards, currentCardPage, totalCardPages…
         List<PokemonCardDto> all = pokemonApiClient.getAllCards();
         int from = Math.min(pageable.getPageNumber() * pageable.getPageSize(), all.size());
         int to   = Math.min(from + pageable.getPageSize(), all.size());
         model.addAttribute("cards", all.subList(from, to));
         model.addAttribute("currentCardPage", pageable.getPageNumber());
-        model.addAttribute("totalCardPages", (int)Math.ceil((double)all.size() / pageable.getPageSize()));
+        model.addAttribute("totalCardPages", (int)Math.ceil((double) all.size() / pageable.getPageSize()));
 
-        // 4) Initialisation du DeckFormDto (nom sera écrasé à la soumission)
+        // 4) ton DeckFormDto
         DeckFormDto form = new DeckFormDto();
         form.setFormat("POKEMON");
         form.setStatut(DeckStatut.BROUILLON);
@@ -136,40 +140,43 @@ public class DeckController {
     }
 
     @PostMapping("/new")
-    public String saveNewDeck(@ModelAttribute("deckForm") DeckFormDto deckForm) {
+    public String saveNewDeck(
+            @RequestParam("draftDeckId") Long draftId,
+            @ModelAttribute("deckForm") DeckFormDto deckForm) {
 
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        Utilisateur user = utilisateurRepository
-                .findByUsername(auth.getName())
-                .orElseThrow(() -> new IllegalStateException("Utilisateur introuvable"));
+        Deck draft = deckRepository.findById(draftId)
+                .orElseThrow(() -> new IllegalArgumentException("Draft introuvable : " + draftId));
 
-        Deck deck = new Deck();
-        deck.setName(deckForm.getName());
-        deck.setFormat("POKEMON");
-        deck.setStatut(deckForm.getStatut());     // BROUILLON ou PUBLIE
-        deck.setOwner(user);
-        deck.setCreatedAt(LocalDateTime.now());
-        // si vous tenez à la description, mappez-la aussi : deck.setDescription(...);
+        if (deckForm.getSelectedCardIds() == null
+                || deckForm.getSelectedCardIds().isEmpty()) {
+            deckRepository.delete(draft);
+            return "redirect:/decks/new";
+        }
 
-        // Groupe les IDs pour créer les DeckCard avec la bonne quantité
+        // 1) Met à jour les métadonnées
+        draft.setName(deckForm.getName());
+        draft.setStatut(deckForm.getStatut());
+
+        // 2) Recrée la liste de DeckCard à partir du grouping
         Map<String, Long> counts = deckForm.getSelectedCardIds().stream()
                 .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 
-        List<DeckCard> cards = counts.entrySet().stream().map(e -> {
-            String apiId = e.getKey();
-            int qty    = e.getValue().intValue();
-            PokemonCardDto dto = pokemonApiClient.getCardById(apiId);
-            DeckCard dc = new DeckCard();
-            dc.setApiCardId(dto.getId());
-            dc.setName(dto.getName());
-            dc.setQuantity(qty);
-            dc.setDeck(deck);
-            return dc;
-        }).toList();
+        List<DeckCard> newCards = counts.entrySet().stream()
+                .map(e -> {
+                    PokemonCardDto dto = pokemonApiClient.getCardById(e.getKey());
+                    DeckCard dc = new DeckCard();
+                    dc.setApiCardId(dto.getId());
+                    dc.setName(dto.getName());
+                    dc.setQuantity(e.getValue().intValue());
+                    dc.setDeck(draft);
+                    return dc;
+                })
+                .toList();
 
-        deck.setCards(cards);
+        draft.getCards().clear();
+        draft.getCards().addAll(newCards);
 
-        deckRepository.save(deck);
+        deckRepository.save(draft);
         return "redirect:/decks";
     }
 

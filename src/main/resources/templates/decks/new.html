@@ -96,7 +96,7 @@
             </label>
             <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
                 <li><a>Profil</a></li>
-                <li><a th:href="@{/decks}">Mes Decks</a></li>
+                <li><a th:href="@{/utilisateurs/mes-decks}">Mes Decks</a></li>
                 <li><a th:href="@{/logout}">Déconnexion</a></li>
             </ul>
         </div>
@@ -107,7 +107,7 @@
 <main class="container mx-auto px-4 py-6">
     <form th:action="@{/decks/new}" method="post" th:object="${deckForm}">
         <!-- on a besoin du draftDeckId pour l’AJAX -->
-        <input type="hidden" id="draft-deck-id" th:value="${draftDeckId}"/>
+        <input type="hidden" name="draftDeckId" id="draft-deck-id" th:value="${draftDeckId}" />
 
         <!-- Deck Info & Progress -->
         <div class="bg-base-100 rounded-box shadow-lg p-6 mb-6 pokemon-bg">
@@ -125,9 +125,9 @@
                             <input type="text" th:field="*{name}" placeholder="Mon super deck" class="input input-bordered w-full" />
                         </div>
                         <div class="form-control">
-                            <label class="label">
-                                <span class="label-text font-semibold">Format</span>
-                            </label>
+<!--                            <label class="label">-->
+<!--                                <span class="label-text font-semibold">Format</span>-->
+<!--                            </label>-->
                             <input type="hidden" th:field="*{format}" />
                         </div>
                     </div>
@@ -261,7 +261,7 @@
                     <div class="flex justify-center mt-6">
                         <div class="join">
                             <a th:each="i : ${#numbers.sequence(0, totalCardPages - 1)}"
-                               th:href="@{/decks/new(page=${i})}"
+                               th:href="@{/decks/new(page=${i}, draftDeckId=${draftDeckId})}"
                                th:text="${i + 1}"
                                th:classappend="${i == currentCardPage} ? 'btn-active' : ''"
                                class="btn join-item">
@@ -386,10 +386,13 @@
 
 <!-- Scripts -->
 <script>
-    // Récupération CSRF et draftDeckId
     const csrfToken  = document.querySelector('meta[name="_csrf"]').getAttribute('content');
     const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
     const draftDeckId = document.getElementById('draft-deck-id').value;
+
+    // === Début ajout localStorage ===
+    // clé unique pour ce draft
+    const lsKey = 'deckState_' + draftDeckId;
 
     // État du deck côté client
     const deck = {
@@ -398,6 +401,13 @@
         energy: [],
         cardCount: 0
     };
+
+    const saved = localStorage.getItem(lsKey);
+    if (saved) {
+        Object.assign(deck, JSON.parse(saved));
+    }
+
+    // === Fin ajout localStorage ===
 
     // Met à jour tous les compteurs et recrée les inputs cachés pour Spring
     function updateCounters() {
@@ -432,13 +442,16 @@
         // Recréation des inputs cachés pour Spring MVC
         const container = document.getElementById("selectedCardInputs");
         container.innerHTML = "";
-        allCards.map(c => c.id).forEach(id => {
+        [...deck.pokemon, ...deck.trainer, ...deck.energy].forEach(c => {
             const inp = document.createElement("input");
             inp.type  = "hidden";
             inp.name  = "selectedCardIds";
-            inp.value = id;
+            inp.value = c.id;
             container.appendChild(inp);
         });
+
+        // **Persistance** de l’état
+        localStorage.setItem(lsKey, JSON.stringify(deck));
     }
 
     // Met à jour l'affichage des listes Pokémon / Trainer / Énergie

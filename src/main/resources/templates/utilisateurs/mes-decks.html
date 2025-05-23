@@ -61,7 +61,7 @@
             </label>
             <ul tabindex="0" class="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52">
                 <li><a>Profil</a></li>
-                <li><a th:href="@{/decks}">Mes Decks</a></li>
+                <li><a th:href="@{/utilisateurs/mes-decks}">Mes Decks</a></li>
                 <li><a th:href="@{/logout}">Déconnexion</a></li>
             </ul>
         </div>
@@ -154,9 +154,39 @@
                             <a th:href="@{'/decks/' + ${deck.id}}" class="btn btn-sm btn-primary">
                                 <i class="fas fa-eye mr-1"></i> Voir
                             </a>
-                            <button class="btn btn-sm btn-ghost">
-                                <i class="fas fa-ellipsis-v"></i>
-                            </button>
+                            <div class="dropdown relative">
+                                <label tabindex="0" class="btn btn-sm btn-ghost">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </label>
+
+                                <ul
+                                        tabindex="0"
+                                        class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52
+           absolute top-0 left-full mt-1">
+                                    <li>
+                                        <a th:href="@{/decks/{id}/edit(id=${deck.id})}"
+                                           class="flex items-center hover:bg-base-200 rounded p-1">
+                                            <i class="fas fa-edit mr-2"></i>
+                                            Modifier
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <form th:action="@{/decks/{id}/delete(id=${deck.id})}"
+                                              method="post"
+                                              class="w-full">
+                                            <input th:name="${_csrf.parameterName}"
+                                                   th:value="${_csrf.token}"
+                                                   type="hidden"/>
+                                            <button type="submit"
+                                                    class="flex items-center w-full text-error hover:bg-base-200 rounded p-1 bg-transparent border-none">
+                                                <i class="fas fa-trash-alt mr-2"></i>
+                                                Supprimer
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </div>
+
                         </div>
                     </div>
                 </div>
