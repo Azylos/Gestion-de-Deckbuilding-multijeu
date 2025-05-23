@@ -11,47 +11,53 @@ import java.util.List;
 @Service
 public class DeckViewMapper {
     private final PokemonApiClient pokemonApiClient;
+    private final CardCacheService cardCacheService;
 
-    public DeckViewMapper(PokemonApiClient pokemonApiClient) {
+    public DeckViewMapper(PokemonApiClient pokemonApiClient, CardCacheService cardCacheService) {
         this.pokemonApiClient = pokemonApiClient;
+        this.cardCacheService = cardCacheService;
     }
 
     public DeckViewDto toDeckView(Deck deck) {
-        String thumbnail = null;
-        List<String> types = new ArrayList<>();
+        DeckViewDto dto = new DeckViewDto();
 
-        if (!deck.getCards().isEmpty()) {
-            var firstCard = deck.getCards().get(0);
-            try {
-                PokemonCardDto cardDto = pokemonApiClient.getCardById(firstCard.getApiCardId());
-                thumbnail = cardDto.getImageUrl();
-                types = cardDto.getSubtypes();
-            } catch (Exception e) {
-                System.err.println("Erreur API Pokémon pour la carte : " + firstCard.getApiCardId());
-            }
-        }
+        dto.setId(deck.getId());
+        dto.setName(deck.getName());
+        dto.setDescription(deck.getDescription());
+        dto.setOwnerName(deck.getOwner().getUsername());
+        dto.setCreatedAt(deck.getCreatedAt());
+        dto.setViews(deck.getViews());
+        dto.setFormat(deck.getFormat());
 
-        DeckViewDto dto = new DeckViewDto(
-                deck.getId(),
-                deck.getName(),
-                deck.getDescription(),
-                deck.getOwner() != null ? deck.getOwner().getUsername() : "Anonyme",
-                deck.getCreatedAt(),
-                deck.getViews(),
-                thumbnail,
-                types,
-                deck.getFormat()
-        );
-
+        // puis votre calcul des cartes / quantités :
         List<PokemonCardDto> cardDtos = deck.getCards().stream()
                 .map(dc -> {
-                    PokemonCardDto cd = pokemonApiClient.getCardById(dc.getApiCardId());
+                    PokemonCardDto cd;
+                    try {
+                        cd = cardCacheService.getCard(dc.getApiCardId());
+                    } catch (Exception e) {
+                        cd = new PokemonCardDto();
+                        cd.setId(dc.getApiCardId());
+                        cd.setName("Carte indisponible");
+                        cd.setImageUrl("/images/placeholder.png");
+                    }
                     cd.setQuantity(dc.getQuantity());
                     return cd;
                 })
                 .toList();
-
         dto.setCards(cardDtos);
+
+        int total = cardDtos.stream().mapToInt(PokemonCardDto::getQuantity).sum();
+        dto.setTotalCards(total);
+        dto.setPokemonCount(  cardDtos.stream()
+                .filter(c->"Pokémon".equals(c.getSupertype()))
+                .mapToInt(PokemonCardDto::getQuantity).sum());
+        dto.setTrainerCount(  cardDtos.stream()
+                .filter(c->"Trainer".equals(c.getSupertype()))
+                .mapToInt(PokemonCardDto::getQuantity).sum());
+        dto.setEnergyCount(   cardDtos.stream()
+                .filter(c->"Energy".equals(c.getSupertype()))
+                .mapToInt(PokemonCardDto::getQuantity).sum());
 
         return dto;
     }

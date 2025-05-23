@@ -101,7 +101,7 @@
     <div class="text-sm breadcrumbs mb-6">
         <ul>
             <li><a th:href="@{/}">Accueil</a></li>
-            <li><a th:href="@{/decks}">Mes Decks</a></li>
+            <li><a th:href="@{/utilisateurs/mes-decks}">Mes Decks</a></li>
             <li class="font-semibold" th:text="${deck.name}">Nom du Deck</li>
         </ul>
     </div>
@@ -167,43 +167,41 @@
     </div>
 
     <!-- Deck Summary -->
-    <div class="bg-base-100 rounded-box shadow-lg p-6">
-        <h2 class="text-2xl font-bold mb-4">Résumé du deck</h2>
-        <div class="stats stats-vertical lg:stats-horizontal shadow w-full">
-            <div class="stat">
-                <div class="stat-figure text-primary">
-                    <i class="fas fa-cards text-2xl"></i>
-                </div>
-                <div class="stat-title">Total de cartes</div>
-                <div class="stat-value text-primary" th:text="${#lists.size(deck.cards)}">60</div>
+    <div class="stats stats-vertical lg:stats-horizontal shadow w-full">
+        <!-- Total de cartes -->
+        <div class="stat">
+            <div class="stat-figure text-primary">
+                <i class="fas fa-cards text-2xl"></i>
             </div>
+            <div class="stat-title">Total de cartes</div>
+            <div class="stat-value text-primary" th:text="${deck.totalCards}">0</div>
+        </div>
 
-            <div class="stat">
-                <div class="stat-figure text-secondary">
-                    <i class="fas fa-paw text-2xl"></i>
-                </div>
-                <div class="stat-title">Pokémon</div>
-                <div class="stat-value text-secondary"
-                     th:text="${#lists.size(deck.cards.?[supertype == 'Pokémon'])}">12</div>
+        <!-- Pokémon -->
+        <div class="stat">
+            <div class="stat-figure text-secondary">
+                <i class="fas fa-paw text-2xl"></i>
             </div>
+            <div class="stat-title">Pokémon</div>
+            <div class="stat-value text-secondary" th:text="${deck.pokemonCount}">0</div>
+        </div>
 
-            <div class="stat">
-                <div class="stat-figure text-accent">
-                    <i class="fas fa-user text-2xl"></i>
-                </div>
-                <div class="stat-title">Dresseurs</div>
-                <div class="stat-value text-accent"
-                     th:text="${#lists.size(deck.cards.?[supertype == 'Trainer'])}">24</div>
+        <!-- Dresseurs -->
+        <div class="stat">
+            <div class="stat-figure text-accent">
+                <i class="fas fa-user text-2xl"></i>
             </div>
+            <div class="stat-title">Dresseurs</div>
+            <div class="stat-value text-accent" th:text="${deck.trainerCount}">0</div>
+        </div>
 
-            <div class="stat">
-                <div class="stat-figure text-warning">
-                    <i class="fas fa-bolt text-2xl"></i>
-                </div>
-                <div class="stat-title">Énergies</div>
-                <div class="stat-value text-warning"
-                     th:text="${#lists.size(deck.cards.?[supertype == 'Energy'])}">24</div>
+        <!-- Énergies -->
+        <div class="stat">
+            <div class="stat-figure text-warning">
+                <i class="fas fa-bolt text-2xl"></i>
             </div>
+            <div class="stat-title">Énergies</div>
+            <div class="stat-value text-warning" th:text="${deck.energyCount}">0</div>
         </div>
     </div>
 </main>

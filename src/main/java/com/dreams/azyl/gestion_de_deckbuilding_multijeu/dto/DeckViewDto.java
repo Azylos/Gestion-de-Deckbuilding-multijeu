@@ -14,6 +14,10 @@ public class DeckViewDto {
     private List<String> types; // ex: ["Feu", "Électrik"]
     private String format;
     private List<PokemonCardDto> cards;
+    private int totalCards;
+    private int pokemonCount;
+    private int trainerCount;
+    private int energyCount;
 
     public DeckViewDto() {
     }
@@ -108,6 +112,38 @@ public class DeckViewDto {
 
     public void setCards(List<PokemonCardDto> cards) {
         this.cards = cards;
+    }
+
+    public int getTotalCards() {
+        return totalCards;
+    }
+
+    public void setTotalCards(int totalCards) {
+        this.totalCards = totalCards;
+    }
+
+    public int getPokemonCount() {
+        return pokemonCount;
+    }
+
+    public void setPokemonCount(int pokemonCount) {
+        this.pokemonCount = pokemonCount;
+    }
+
+    public int getTrainerCount() {
+        return trainerCount;
+    }
+
+    public void setTrainerCount(int trainerCount) {
+        this.trainerCount = trainerCount;
+    }
+
+    public int getEnergyCount() {
+        return energyCount;
+    }
+
+    public void setEnergyCount(int energyCount) {
+        this.energyCount = energyCount;
     }
 }
 
