@@ -221,7 +221,7 @@
                         <!-- Sample Pokémon Card -->
                         <div th:each="card : ${cards}"
                              class="card card-compact bg-base-100 shadow-md card-hover animate__animated animate__fadeIn relative"
-                             th:attr="data-type=${card.supertype.toLowerCase()}, data-card-id=${card.id}">
+                             th:attr="data-type=${card.supertype == 'Pokémon' ? 'pokemon' : card.supertype == 'Trainer' ? 'trainer' : card.supertype == 'Energy'  ? 'energy': 'unknown'}, data-card-id=${card.id}">
                             <figure class="px-4 pt-4">
                                 <img th:src="${card.imageUrl}" th:alt="${card.name}" class="rounded-xl h-40 w-full object-contain" />
                             </figure>

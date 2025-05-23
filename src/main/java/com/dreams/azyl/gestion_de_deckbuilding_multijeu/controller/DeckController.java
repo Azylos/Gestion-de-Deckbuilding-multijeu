@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -126,6 +127,7 @@ public class DeckController {
         card.setApiCardId(dto.getId());
         card.setName(dto.getName());
         card.setQuantity(1);
+        card.setType(dto.getSupertype());  // TODO : plus tard remplacer par dto.getTypes()
         card.setDeck(deck);
 
         deck.getCards().add(card);
@@ -140,9 +142,7 @@ public class DeckController {
     }
 
     @PostMapping("/new")
-    public String saveNewDeck(
-            @RequestParam("draftDeckId") Long draftId,
-            @ModelAttribute("deckForm") DeckFormDto deckForm) {
+    public String saveNewDeck(@RequestParam("draftDeckId") Long draftId, @ModelAttribute("deckForm") DeckFormDto deckForm) {
 
         Deck draft = deckRepository.findById(draftId)
                 .orElseThrow(() -> new IllegalArgumentException("Draft introuvable : " + draftId));
@@ -168,6 +168,7 @@ public class DeckController {
                     dc.setApiCardId(dto.getId());
                     dc.setName(dto.getName());
                     dc.setQuantity(e.getValue().intValue());
+                    dc.setType(dto.getSupertype());
                     dc.setDeck(draft);
                     return dc;
                 })
@@ -181,41 +182,87 @@ public class DeckController {
     }
 
     @GetMapping("/{id}/edit")
-    public String editDeck(@PathVariable Long id, Model model) {
-        Deck deck = deckRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Deck introuvable: " + id));
+    public String editDeck(@PathVariable Long id, Model model, @PageableDefault(size = 20) Pageable pageable) {
+
+        Deck deck = deckRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Deck introuvable : " + id));
 
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         if (!deck.getOwner().getUsername().equals(username)) {
-            return "redirect:/access-denied"; // ou 403
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
 
+        // 1) Métadonnées
         DeckFormDto dto = new DeckFormDto();
         dto.setName(deck.getName());
-        dto.setFormat(deck.getDescription()); // adapter si besoin
+        dto.setFormat(deck.getFormat());
+        dto.setDescription(deck.getDescription());
         dto.setStatut(deck.getStatut());
-
         model.addAttribute("deckForm", dto);
         model.addAttribute("deckId", id);
 
-        return "decks/edit"; // ton formulaire de modification
+        // 2) Pagination de TOUTES les cartes dispos via l’API
+        List<PokemonCardDto> all = pokemonApiClient.getAllCards();
+        int from = Math.min(pageable.getPageNumber() * pageable.getPageSize(), all.size());
+        int to   = Math.min(from + pageable.getPageSize(), all.size());
+        model.addAttribute("cards", all.subList(from, to));
+        model.addAttribute("currentCardPage", pageable.getPageNumber());
+        model.addAttribute("totalCardPages", (int)Math.ceil((double) all.size() / pageable.getPageSize()));
+
+        // 3) Stocker l’état actuel du deck (chaque carte répété selon sa quantité)
+        List<PokemonCardDto> selected = deck.getCards().stream()
+                .flatMap(dc -> {
+                    PokemonCardDto apiDto = pokemonApiClient.getCardById(dc.getApiCardId());
+                    return Collections.nCopies(dc.getQuantity(), apiDto).stream();
+                })
+                .collect(Collectors.toList());
+        model.addAttribute("selectedCards", selected);
+
+        // 4) On utilisera "draftDeckId" dans le JS pour les requêtes AJAX
+        model.addAttribute("draftDeckId", id);
+
+        return "decks/edit";
     }
 
     @PostMapping("/{id}/edit")
-    public String updateDeck(@PathVariable Long id, @ModelAttribute DeckFormDto form) {
-        Deck deck = deckRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Deck introuvable"));
+    public String updateDeck(@PathVariable Long id, @ModelAttribute("deckForm") DeckFormDto form, @RequestParam("selectedCardIds") List<String> selectedCardIds) {
 
+        Deck deck = deckRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Deck introuvable : " + id));
+
+        // Vérif propriétaire…
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         if (!deck.getOwner().getUsername().equals(username)) {
-            return "redirect:/access-denied";
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
 
+        // 1) Métadonnées
         deck.setName(form.getName());
-        deck.setDescription(form.getFormat());
+        deck.setFormat(form.getFormat());
+        deck.setDescription(form.getDescription());
         deck.setStatut(form.getStatut());
-        // TODO: recharger les cartes si modifiables
+
+        // 2) Reconstruire les DeckCard à partir des IDs envoyés
+        Map<String, Long> counts = selectedCardIds.stream()
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+        List<DeckCard> newCards = counts.entrySet().stream()
+                .map(e -> {
+                    PokemonCardDto dto = pokemonApiClient.getCardById(e.getKey());
+                    DeckCard dc = new DeckCard();
+                    dc.setApiCardId(dto.getId());
+                    dc.setName(dto.getName());
+                    dc.setQuantity(e.getValue().intValue());
+                    dc.setType(dto.getSupertype());
+                    dc.setDeck(deck);
+                    return dc;
+                })
+                .toList();
+
+        deck.getCards().clear();
+        deck.getCards().addAll(newCards);
 
         deckRepository.save(deck);
-        return "redirect:/decks";
+        return "redirect:/decks/" + id;
     }
 
     @PostMapping("/{id}/delete")

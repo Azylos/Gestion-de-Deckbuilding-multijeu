@@ -47,12 +47,13 @@ public class CardCacheService {
      */
     private PokemonCardDto toDto(CardCache entity) {
         return new PokemonCardDto(
-                entity.getApiCardId(),
-                entity.getName(),
-                entity.getType(),
-                List.of(), // les subtypes ne sont pas stockés dans l'entité (optionnel)
-                entity.getImageUrl(),
-                entity.getDescription()
+                entity.getApiCardId(),   // id
+                entity.getName(),        // name
+                entity.getType(),        // supertype
+                List.of(),               // subtypes (vide)
+                entity.getType(),        // type (même valeur que supertype)
+                entity.getImageUrl(),    // imageUrl
+                entity.getDescription()  // text
         );
     }
 

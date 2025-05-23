@@ -7,6 +7,7 @@ public class PokemonCardDto {
     private String name;
     private String supertype;
     private List<String> subtypes;
+    private String type;
     private String imageUrl;
     private String text;
     private Integer quantity;
@@ -15,11 +16,12 @@ public class PokemonCardDto {
 
     }
 
-    public PokemonCardDto(String id, String name, String supertype, List<String> subtypes, String imageUrl, String text) {
+    public PokemonCardDto(String id, String name, String supertype, List<String> subtypes, String type, String imageUrl, String text) {
         this.id = id;
         this.name = name;
         this.supertype = supertype;
         this.subtypes = subtypes;
+        this.type = type;
         this.imageUrl = imageUrl;
         this.text = text;
     }
@@ -78,5 +80,13 @@ public class PokemonCardDto {
 
     public void setQuantity(Integer quantity) {
         this.quantity = quantity;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String types) {
+        this.type = types;
     }
 }
