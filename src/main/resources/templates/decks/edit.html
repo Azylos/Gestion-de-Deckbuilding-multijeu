@@ -336,6 +336,49 @@
         cardQuantities: {}
     };
 
+    // Add card to deck
+    function addCardToDeck(card) {
+        // Update quantities
+        deck.cardQuantities[card.name] = (deck.cardQuantities[card.name] || 0) + 1;
+
+        // Add to appropriate array
+        if (card.type === 'pokémon') {
+            deck.pokemon.push(card);
+        } else if (card.type === 'trainer') {
+            deck.trainer.push(card);
+        } else if (card.type === 'energy') {
+            deck.energy.push(card);
+        }
+
+        deck.cardCount++;
+        updateUI();
+    }
+
+    // Remove card from deck
+    function removeCardFromDeck(type, index) {
+        let card;
+
+        if (type === 'pokemon') {
+            card = deck.pokemon[index];
+            deck.pokemon.splice(index, 1);
+        } else if (type === 'trainer') {
+            card = deck.trainer[index];
+            deck.trainer.splice(index, 1);
+        } else if (type === 'energy') {
+            card = deck.energy[index];
+            deck.energy.splice(index, 1);
+        }
+
+        if (card) {
+            deck.cardQuantities[card.name]--;
+            if (deck.cardQuantities[card.name] <= 0) {
+                delete deck.cardQuantities[card.name];
+            }
+            deck.cardCount--;
+            updateUI();
+        }
+    }
+
     // Energy type colors
     const energyColors = {
         fire: 'bg-red-500 text-white',
@@ -482,20 +525,20 @@
                 const item = document.createElement('div');
                 item.className = 'flex items-center justify-between p-2 bg-red-50 rounded';
                 item.innerHTML = `
-                        <div class="flex items-center">
-                            <img src="${pokemon.image}" class="w-10 h-10 object-contain mr-2" />
-                            <span class="text-sm">${pokemon.name}</span>
-                            <span class="badge badge-sm ml-2">${deck.cardQuantities[pokemon.name] || 1}</span>
-                        </div>
-                        <div class="flex items-center gap-1">
-                            <button class="btn btn-xs btn-ghost remove-card-btn" data-index="${index}" data-type="pokemon">
-                                <i class="fas fa-minus"></i>
-                            </button>
-                            <button class="btn btn-xs btn-error remove-all-btn" data-name="${pokemon.name}">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                    `;
+                    <div class="flex items-center">
+                        <img src="${pokemon.image}" class="w-10 h-10 object-contain mr-2" />
+                        <span class="text-sm">${pokemon.name}</span>
+                        <span class="badge badge-sm ml-2">${deck.cardQuantities[pokemon.name] || 1}</span>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <button class="btn btn-xs btn-ghost remove-card-btn" data-index="${index}" data-type="pokemon">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        <button class="btn btn-xs btn-error remove-all-btn" data-name="${pokemon.name}">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `;
                 pokemonList.appendChild(item);
             });
         }
@@ -511,20 +554,20 @@
                 const item = document.createElement('div');
                 item.className = 'flex items-center justify-between p-2 bg-blue-50 rounded';
                 item.innerHTML = `
-                        <div class="flex items-center">
-                            <img src="${trainer.image}" class="w-10 h-10 object-contain mr-2" />
-                            <span class="text-sm">${trainer.name}</span>
-                            <span class="badge badge-sm ml-2">${deck.cardQuantities[trainer.name] || 1}</span>
-                        </div>
-                        <div class="flex items-center gap-1">
-                            <button class="btn btn-xs btn-ghost remove-card-btn" data-index="${index}" data-type="trainer">
-                                <i class="fas fa-minus"></i>
-                            </button>
-                            <button class="btn btn-xs btn-error remove-all-btn" data-name="${trainer.name}">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                    `;
+                    <div class="flex items-center">
+                        <img src="${trainer.image}" class="w-10 h-10 object-contain mr-2" />
+                        <span class="text-sm">${trainer.name}</span>
+                        <span class="badge badge-sm ml-2">${deck.cardQuantities[trainer.name] || 1}</span>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <button class="btn btn-xs btn-ghost remove-card-btn" data-index="${index}" data-type="trainer">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        <button class="btn btn-xs btn-error remove-all-btn" data-name="${trainer.name}">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `;
                 trainerList.appendChild(item);
             });
         }
@@ -540,20 +583,20 @@
                 const item = document.createElement('div');
                 item.className = 'flex items-center justify-between p-2 bg-yellow-50 rounded';
                 item.innerHTML = `
-                        <div class="flex items-center">
-                            <img src="${energy.image}" class="w-10 h-10 object-contain mr-2" />
-                            <span class="text-sm">${energy.name}</span>
-                            <span class="badge badge-sm ml-2">${deck.cardQuantities[energy.name] || 1}</span>
-                        </div>
-                        <div class="flex items-center gap-1">
-                            <button class="btn btn-xs btn-ghost remove-card-btn" data-index="${index}" data-type="energy">
-                                <i class="fas fa-minus"></i>
-                            </button>
-                            <button class="btn btn-xs btn-error remove-all-btn" data-name="${energy.name}">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                    `;
+                    <div class="flex items-center">
+                        <img src="${energy.image}" class="w-10 h-10 object-contain mr-2" />
+                        <span class="text-sm">${energy.name}</span>
+                        <span class="badge badge-sm ml-2">${deck.cardQuantities[energy.name] || 1}</span>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <button class="btn btn-xs btn-ghost remove-card-btn" data-index="${index}" data-type="energy">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        <button class="btn btn-xs btn-error remove-all-btn" data-name="${energy.name}">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `;
                 energyList.appendChild(item);
             });
         }
@@ -589,172 +632,8 @@
             container.appendChild(input);
         });
     }
-
-    // Add card to deck
-    function addCardToDeck(card) {
-        // Update quantities
-        deck.cardQuantities[card.name] = (deck.cardQuantities[card.name] || 0) + 1;
-
-        // Add to appropriate array
-        if (card.type === 'pokémon') {
-            deck.pokemon.push(card);
-        } else if (card.type === 'trainer') {
-            deck.trainer.push(card);
-        } else if (card.type === 'energy') {
-            deck.energy.push(card);
-        }
-
-        deck.cardCount++;
-        updateUI();
-    }
-
-    // Remove card from deck
-    function removeCardFromDeck(type, index) {
-        let card;
-
-        if (type === 'pokemon') {
-            card = deck.pokemon[index];
-            deck.pokemon.splice(index, 1);
-        } else if (type === 'trainer') {
-            card = deck.trainer[index];
-            deck.trainer.splice(index, 1);
-        } else if (type === 'energy') {
-            card = deck.energy[index];
-            deck.energy.splice(index, 1);
-        }
-
-        if (card) {
-            deck.cardQuantities[card.name]--;
-            if (deck.cardQuantities[card.name] <= 0) {
-                delete deck.cardQuantities[card.name];
-            }
-            deck.cardCount--;
-            updateUI();
-        }
-    }
-
-    // Remove all cards with given name
-    function removeAllCardsByName(cardName) {
-        const count = deck.cardQuantities[cardName] || 0;
-
-        // Remove from Pokémon
-        deck.pokemon = deck.pokemon.filter(p => p.name !== cardName);
-
-        // Remove from Trainer
-        deck.trainer = deck.trainer.filter(t => t.name !== cardName);
-
-        // Remove from Energy
-        deck.energy = deck.energy.filter(e => e.name !== cardName);
-
-        // Update counts
-        deck.cardCount -= count;
-        delete deck.cardQuantities[cardName];
-
-        updateUI();
-    }
-
-    // Initialize event listeners
-    document.addEventListener('DOMContentLoaded', function() {
-        // Add card buttons
-        document.querySelectorAll('.add-card-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const cardElement = this.closest('.card');
-                const cardId = cardElement.dataset.cardId;
-                const cardName = cardElement.querySelector('.card-title').textContent;
-                const cardImage = cardElement.querySelector('img').src;
-                const cardType = cardElement.dataset.type;
-                const cardEnergy = cardElement.dataset.energy || '';
-
-                // Check if we can add more of this type
-                if (cardType === 'pokémon' && deck.pokemon.length >= 20) {
-                    alert('Vous ne pouvez pas ajouter plus de 20 Pokémon dans un deck.');
-                    return;
-                }
-
-                // Check if we've reached 60 cards
-                if (deck.cardCount >= 60) {
-                    alert('Un deck ne peut pas contenir plus de 60 cartes.');
-                    return;
-                }
-
-                // Check if we already have 4 of this card (except basic energy)
-                if (deck.cardQuantities[cardName] >= 4 && cardType !== 'energy') {
-                    alert('Vous ne pouvez pas avoir plus de 4 copies d\'une même carte (hors énergies de base).');
-                    return;
-                }
-
-                // Add the card
-                addCardToDeck({
-                    id: cardId,
-                    name: cardName,
-                    image: cardImage,
-                    type: cardType,
-                    energy: cardEnergy
-                });
-            });
-        });
-
-        // Filter buttons
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const filter = this.dataset.filter;
-
-                // Update active state
-                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-
-                // Filter cards
-                document.querySelectorAll('#card-collection .card').forEach(card => {
-                    if (filter === 'all') {
-                        card.style.display = 'block';
-                    } else if (filter === 'pokemon' || filter === 'trainer' || filter === 'energy') {
-                        card.style.display = card.dataset.type === filter ? 'block' : 'none';
-                    } else {
-                        // Energy type filter
-                        card.style.display = card.dataset.energy === filter ? 'block' : 'none';
-                    }
-                });
-            });
-        });
-
-        // Search functionality
-        document.getElementById('card-search').addEventListener('input', function() {
-            const searchTerm = this.value.toLowerCase();
-
-            document.querySelectorAll('#card-collection .card').forEach(card => {
-                const cardName = card.querySelector('.card-title').textContent.toLowerCase();
-                card.style.display = cardName.includes(searchTerm) ? 'block' : 'none';
-            });
-        });
-
-        // Global search
-        document.getElementById('global-search').addEventListener('input', function() {
-            const searchTerm = this.value.toLowerCase();
-
-            if (searchTerm.length > 2) {
-                // In a real app, this would trigger an API call to search all cards
-                console.log('Searching for:', searchTerm);
-            }
-        });
-
-        // Initialize UI
-        updateUI();
-    });
-
-    function updateHiddenInputs() {
-        const c = document.getElementById('selected-card-inputs');
-        // Toujours un champ, même vide
-        // c.innerHTML = '<input type="hidden" name="selectedCardIds" value="" />';
-        // Puis un champ par carte réelle
-        [...deck.pokemon, ...deck.trainer, ...deck.energy].forEach(card => {
-            const i = document.createElement('input');
-            i.type  = 'hidden';
-            i.name  = 'selectedCardIds';
-            i.value = card.id;
-            c.appendChild(i);
-        });
-    }
     /*]]>*/
 </script>
+
 </body>
 </html>
