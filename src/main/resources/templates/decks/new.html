@@ -202,6 +202,7 @@
                                     <li><a href="#" data-filter="trainer">Dresseur</a></li>
                                     <li><a href="#" data-filter="energy">Énergie</a></li>
                                     <li class="menu-title">Types</li>
+                                    <li><a href="#" data-filter="all">Tous les types</a></li>
                                     <li><a href="#" data-type-filter="Feu">Feu</a></li>
                                     <li><a href="#" data-type-filter="Eau">Eau</a></li>
                                     <li><a href="#" data-type-filter="Plante">Plante</a></li>
@@ -698,9 +699,16 @@
         el.addEventListener('click', e => {
             e.preventDefault();
             const wanted = e.target.dataset.filter.toLowerCase();
-            const filtered = window.allCards.filter(card =>
-                (card.supertype || '').toLowerCase() === wanted
-            );
+
+            let filtered;
+            if (wanted === 'all') {
+                filtered = window.allCards;
+            } else {
+                filtered = window.allCards.filter(card =>
+                    (card.supertype || '').toLowerCase() === wanted
+                );
+            }
+
             renderCards(filtered);
         });
     });
