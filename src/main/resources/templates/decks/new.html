@@ -228,19 +228,19 @@
                             <div class="card-body p-4">
                                 <div class="flex justify-between items-start">
                                     <h4 class="card-title text-sm" th:text="${card.name}">Nom</h4>
-<!--                                    <th:block th:if="${card.supertype == 'Pokémon'}">-->
-<!--                                            <span class="type-badge"-->
-<!--                                                  th:classappend="${card.types[0] == 'Fire'} ? 'bg-red-100 text-red-800' :-->
-<!--                                                                (${card.types[0] == 'Water'} ? 'bg-blue-100 text-blue-800' :-->
-<!--                                                                (${card.types[0] == 'Grass'} ? 'bg-green-100 text-green-800' :-->
-<!--                                                                (${card.types[0] == 'Lightning'} ? 'bg-yellow-100 text-yellow-800' :-->
-<!--                                                                (${card.types[0] == 'Psychic'} ? 'bg-purple-100 text-purple-800' :-->
-<!--                                                                (${card.types[0] == 'Fighting'} ? 'bg-orange-100 text-orange-800' :-->
-<!--                                                                (${card.types[0] == 'Darkness'} ? 'bg-gray-700 text-white' :-->
-<!--                                                                (${card.types[0] == 'Metal'} ? 'bg-gray-400 text-gray-800' :-->
-<!--                                                                'bg-pink-100 text-pink-800')))))))"-->
-<!--                                                  th:text="${card.types[0]}">Type</span>-->
-<!--                                    </th:block>-->
+                                    <th:block th:if="${card.supertype == 'Pokémon'}">
+                                        <span class="type-badge"
+                                              th:classappend="${card.types[0] == 'Fire'} ? 'bg-red-100 text-red-800' :
+                                                             (${card.types[0] == 'Water'} ? 'bg-blue-100 text-blue-800' :
+                                                             (${card.types[0] == 'Grass'} ? 'bg-green-100 text-green-800' :
+                                                             (${card.types[0] == 'Lightning'} ? 'bg-yellow-100 text-yellow-800' :
+                                                             (${card.types[0] == 'Psychic'} ? 'bg-purple-100 text-purple-800' :
+                                                             (${card.types[0] == 'Fighting'} ? 'bg-orange-100 text-orange-800' :
+                                                             (${card.types[0] == 'Darkness'} ? 'bg-gray-700 text-white' :
+                                                             (${card.types[0] == 'Metal'} ? 'bg-gray-400 text-gray-800' :
+                                                             'bg-pink-100 text-pink-800')))))))"
+                                              th:text="${card.types[0]}">Type</span>
+                                    </th:block>
                                     <th:block th:if="${card.supertype == 'Trainer'}">
                                         <span class="type-badge bg-purple-100 text-purple-800">Dresseur</span>
                                     </th:block>
@@ -679,30 +679,43 @@
         });
     }
 
-    // Filtres globaux (type: pokemon/trainer/energy)
+    const typeTranslation = {
+        "feu": "fire",
+        "eau": "water",
+        "plante": "grass",
+        "électrik": "lightning",
+        "psy": "psychic",
+        "combat": "fighting",
+        "ténèbres": "darkness",
+        "métal": "metal",
+        "fée": "fairy",
+        "dragon": "dragon",
+        "incolore": "colorless"
+    };
+
+    // Filtres par supertype : Pokémon / Trainer / Énergie
     document.querySelectorAll('[data-filter]').forEach(el => {
         el.addEventListener('click', e => {
             e.preventDefault();
             const wanted = e.target.dataset.filter.toLowerCase();
-
             const filtered = window.allCards.filter(card =>
-                (card.type || '').toLowerCase() === wanted
+                (card.supertype || '').toLowerCase() === wanted
             );
-
             renderCards(filtered);
         });
     });
 
-    // Filtres par type élémentaire (feu, eau, etc.)
+    // Filtres par type élémentaire : Feu, Eau, etc.
     document.querySelectorAll('[data-type-filter]').forEach(el => {
         el.addEventListener('click', e => {
             e.preventDefault();
-            const wanted = e.target.dataset.typeFilter.toLowerCase();
+            const fr = e.target.dataset.typeFilter.toLowerCase();
+            const en = typeTranslation[fr];
+            if (!en) return;
 
             const filtered = window.allCards.filter(card =>
-                (card.type || '').toLowerCase().includes(wanted)
+                (card.type || '').toLowerCase() === en
             );
-
             renderCards(filtered);
         });
     });
