@@ -657,7 +657,7 @@
         cards.forEach(card => {
             const div = document.createElement('div');
             div.className = "card card-compact bg-base-100 shadow-md card-hover animate__animated animate__fadeIn relative";
-            div.dataset.type = card.type.toLowerCase();
+            div.dataset.type = (card.supertype || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
             div.dataset.cardId = card.id;
 
             div.innerHTML = `
@@ -705,7 +705,7 @@
                 filtered = window.allCards;
             } else {
                 filtered = window.allCards.filter(card =>
-                    (card.supertype || '').toLowerCase() === wanted
+                    (card.supertype || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase() === wanted
                 );
             }
 
