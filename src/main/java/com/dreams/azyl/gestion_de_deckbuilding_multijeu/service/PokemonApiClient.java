@@ -42,7 +42,7 @@
                     d.getName(),
                     d.getSupertype(),
                     d.getSubtypes(),
-                    d.getSupertype(),
+                    d.getTypes(),
                     d.getImages().getSmall(),
                     Optional.ofNullable(d.getFlavorText()).orElse("")
             );
@@ -75,7 +75,7 @@
                             d.getName(),
                             d.getSupertype(),
                             d.getSubtypes(),
-                            d.getSupertype(),
+                            d.getTypes(),
                             d.getImages().getSmall(),
                             Optional.ofNullable(d.getFlavorText()).orElse("")
                     ))

@@ -19,6 +19,10 @@ public class CardCache implements Serializable {
     private String imageUrl;
 
     private String type; // (optionnel) créature, sort, etc.
+    private String supertype;
+
+    @jakarta.persistence.ElementCollection
+    private java.util.List<String> types = new java.util.ArrayList<>();
 
     private String description; // texte de la carte si tu veux l’afficher directement
 
@@ -74,4 +78,21 @@ public class CardCache implements Serializable {
     public void setLastUpdated(LocalDateTime lastUpdated) {
         this.lastUpdated = lastUpdated;
     }
+
+    public String getSupertype() {
+        return supertype;
+    }
+
+    public void setSupertype(String supertype) {
+        this.supertype = supertype;
+    }
+
+    public java.util.List<String> getTypes() {
+        return types;
+    }
+
+    public void setTypes(java.util.List<String> types) {
+        this.types = types;
+    }
+
 }

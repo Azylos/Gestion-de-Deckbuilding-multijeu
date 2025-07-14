@@ -49,9 +49,9 @@ public class CardCacheService {
         return new PokemonCardDto(
                 entity.getApiCardId(),   // id
                 entity.getName(),        // name
-                entity.getType(),        // supertype
-                List.of(),               // subtypes (vide)
-                entity.getType(),        // type (même valeur que supertype)
+                entity.getSupertype(),   // ex-type = supertype
+                List.of(),               // subtypes (vide ou à extraire si tu veux)
+                entity.getTypes(),       // vrai champ List<String> types
                 entity.getImageUrl(),    // imageUrl
                 entity.getDescription()  // text
         );
@@ -64,12 +64,14 @@ public class CardCacheService {
         CardCache entity = new CardCache();
         entity.setApiCardId(dto.getId());
         entity.setName(dto.getName());
-        entity.setType(dto.getSupertype());
+        entity.setType(dto.getSupertype()); // ici type = supertype (Pokemon / Trainer)
+        entity.setTypes(dto.getTypes());    // AJOUT les vrais types élémentaires
         entity.setImageUrl(dto.getImageUrl());
         entity.setDescription(dto.getText());
         entity.setLastUpdated(LocalDateTime.now());
         return entity;
     }
+
 
     public List<PokemonCardDto> getAllCards() {
         return apiClient.getAllCards();

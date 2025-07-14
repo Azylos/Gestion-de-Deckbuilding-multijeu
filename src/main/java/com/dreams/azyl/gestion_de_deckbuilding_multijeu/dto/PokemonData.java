@@ -9,6 +9,7 @@ public class PokemonData {
     private String name;
     private String supertype;
     private List<String> subtypes;
+    private List<String> types;
     private Images images;
     private String flavorText;
 
@@ -25,4 +26,11 @@ public class PokemonData {
     public void setImages(Images images) { this.images = images; }
     public String getFlavorText() { return flavorText; }
     public void setFlavorText(String flavorText) { this.flavorText = flavorText; }
+    public List<String> getTypes() {
+        return types;
+    }
+
+    public void setTypes(List<String> types) {
+        this.types = types;
+    }
 }

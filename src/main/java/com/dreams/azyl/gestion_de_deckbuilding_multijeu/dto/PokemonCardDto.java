@@ -7,24 +7,26 @@ public class PokemonCardDto {
     private String name;
     private String supertype;
     private List<String> subtypes;
-    private String type;
+    private List<String> types; // ✅ Ajouté pour types élémentaires (Feu, Eau, etc.)
     private String imageUrl;
     private String text;
     private Integer quantity;
 
     public PokemonCardDto() {
-
     }
 
-    public PokemonCardDto(String id, String name, String supertype, List<String> subtypes, String type, String imageUrl, String text) {
+    public PokemonCardDto(String id, String name, String supertype, List<String> subtypes,
+                          List<String> types, String imageUrl, String text) {
         this.id = id;
         this.name = name;
         this.supertype = supertype;
         this.subtypes = subtypes;
-        this.type = type;
+        this.types = types;
         this.imageUrl = imageUrl;
         this.text = text;
     }
+
+    // ==== GETTERS & SETTERS ====
 
     public String getId() {
         return id;
@@ -58,6 +60,14 @@ public class PokemonCardDto {
         this.subtypes = subtypes;
     }
 
+    public List<String> getTypes() {
+        return types;
+    }
+
+    public void setTypes(List<String> types) {
+        this.types = types;
+    }
+
     public String getImageUrl() {
         return imageUrl;
     }
@@ -82,16 +92,19 @@ public class PokemonCardDto {
         this.quantity = quantity;
     }
 
+    /**
+     * Sert à déterminer le type principal de carte pour les filtres JS : pokemon, trainer, energy
+     */
     public String getType() {
-        return switch (supertype.toLowerCase()) {
-            case "pokémon" -> "pokemon";
-            case "trainer" -> "trainer";
-            case "energy"  -> "energy";
-            default        -> "unknown";
-        };
-    }
-
-    public void setType(String types) {
-        this.type = types;
+        if (types != null && !types.isEmpty()) {
+            return types.get(0).toLowerCase(); // ex: "fire"
+        } else {
+            return switch (supertype.toLowerCase()) {
+                case "pokémon" -> "pokemon";
+                case "trainer" -> "trainer";
+                case "energy"  -> "energy";
+                default        -> "unknown";
+            };
+        }
     }
 }
