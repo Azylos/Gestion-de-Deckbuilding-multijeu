@@ -9,8 +9,11 @@ import com.dreams.azyl.gestion_de_deckbuilding_multijeu.model.Utilisateur;
 import com.dreams.azyl.gestion_de_deckbuilding_multijeu.model.enums.DeckStatut;
 import com.dreams.azyl.gestion_de_deckbuilding_multijeu.repository.DeckRepository;
 import com.dreams.azyl.gestion_de_deckbuilding_multijeu.repository.UtilisateurRepository;
+import com.dreams.azyl.gestion_de_deckbuilding_multijeu.service.CardCacheService;
 import com.dreams.azyl.gestion_de_deckbuilding_multijeu.service.DeckViewMapper;
 import com.dreams.azyl.gestion_de_deckbuilding_multijeu.service.PokemonApiClient;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -38,12 +41,16 @@ public class DeckController {
     private final PokemonApiClient pokemonApiClient;
     private final UtilisateurRepository utilisateurRepository;
     private final DeckViewMapper deckViewMapper;
+    private final CardCacheService cardCacheService;
+    private final ObjectMapper objectMapper;
 
-    public DeckController(DeckRepository deckRepository, PokemonApiClient pokemonApiClient, UtilisateurRepository utilisateurRepository, DeckViewMapper deckViewMapper) {
+    public DeckController(DeckRepository deckRepository, PokemonApiClient pokemonApiClient, UtilisateurRepository utilisateurRepository, DeckViewMapper deckViewMapper, CardCacheService cardCacheService,  ObjectMapper objectMapper) {
         this.deckRepository = deckRepository;
         this.pokemonApiClient = pokemonApiClient;
         this.utilisateurRepository = utilisateurRepository;
         this.deckViewMapper = deckViewMapper;
+        this.cardCacheService = cardCacheService;
+        this.objectMapper = objectMapper;
     }
 
     @GetMapping
@@ -84,7 +91,7 @@ public class DeckController {
 
 
     @GetMapping("/new")
-    public String showDeckCreationForm(@RequestParam(name="draftDeckId", required=false) Long draftDeckId, Model model, @PageableDefault(size = 20) Pageable pageable) {
+    public String showDeckCreationForm(@RequestParam(name="draftDeckId", required=false) Long draftDeckId, Model model, @PageableDefault(size = 20) Pageable pageable) throws JsonProcessingException {
         Deck draft;
         if (draftDeckId != null) {
             // récupère l’existant
@@ -108,13 +115,21 @@ public class DeckController {
         model.addAttribute("draftDeckId", draft.getId());
 
         // 3) pagination comme avant, cards, currentCardPage, totalCardPages…
-        List<PokemonCardDto> all = pokemonApiClient.getAllCards();
+        List<PokemonCardDto> all;
+        try {
+            all = pokemonApiClient.getAllCards();
+        } catch (Exception ex) {
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Impossible de récupérer les cartes Pokémon. Réessayez plus tard.");
+        }
         int from = Math.min(pageable.getPageNumber() * pageable.getPageSize(), all.size());
         int to   = Math.min(from + pageable.getPageSize(), all.size());
         model.addAttribute("visibleCards", all.subList(from, to));
         model.addAttribute("allCards", all);
         model.addAttribute("currentCardPage", pageable.getPageNumber());
         model.addAttribute("totalCardPages", (int)Math.ceil((double) all.size() / pageable.getPageSize()));
+
+        String allCardsJson = objectMapper.writeValueAsString(all);
+        model.addAttribute("allCardsJson", allCardsJson);
 
         // 4) ton DeckFormDto
         DeckFormDto form = new DeckFormDto();
@@ -135,13 +150,22 @@ public class DeckController {
 
         // récupère apiId et crée le DeckCard
         String apiId = payload.get("apiCardId");
-        PokemonCardDto dto = pokemonApiClient.getCardById(apiId);
+        PokemonCardDto dto;
+        try {
+            dto = pokemonApiClient.getCardById(apiId);
+        } catch (Exception ex) {
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "L'API Pokémon est momentanément indisponible. Veuillez réessayer.");
+        }
 
         DeckCard card = new DeckCard();
         card.setApiCardId(dto.getId());
         card.setName(dto.getName());
         card.setQuantity(1);
-        card.setType(dto.getSupertype());  // TODO : plus tard remplacer par dto.getTypes()
+        if (dto.getTypes() != null && !dto.getTypes().isEmpty()) {
+            card.setType(dto.getTypes().get(0)); // ✅ Type élémentaire Fire, Water, etc.
+        } else {
+            card.setType(dto.getSupertype()); // Fallback si pas de type
+        }
         card.setDeck(deck);
 
         deck.getCards().add(card);
@@ -182,7 +206,11 @@ public class DeckController {
                     dc.setApiCardId(dto.getId());
                     dc.setName(dto.getName());
                     dc.setQuantity(e.getValue().intValue());
-                    dc.setType(dto.getSupertype());
+                    if (dto.getTypes() != null && !dto.getTypes().isEmpty()) {
+                        dc.setType(dto.getTypes().get(0));
+                    } else {
+                        dc.setType(dto.getSupertype());
+                    }
                     dc.setDeck(draft);
                     return dc;
                 })
@@ -266,7 +294,11 @@ public class DeckController {
                     dc.setApiCardId(dto.getId());
                     dc.setName(dto.getName());
                     dc.setQuantity(e.getValue().intValue());
-                    dc.setType(dto.getSupertype());
+                    if (dto.getTypes() != null && !dto.getTypes().isEmpty()) {
+                        dc.setType(dto.getTypes().get(0));
+                    } else {
+                        dc.setType(dto.getSupertype());
+                    }
                     dc.setDeck(deck);
                     return dc;
                 })
