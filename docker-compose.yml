@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16
+    container_name: azybase-postgres
+    environment:
+      POSTGRES_DB: azybase
+      POSTGRES_USER: azylos
+      POSTGRES_PASSWORD: azylos
+    volumes:
+      - azybase_data:/var/lib/postgresql/data
+      - ./init:/docker-entrypoint-initdb.d
+    networks:
+      - azybase-net
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+
+volumes:
+  azybase_data:
+
+networks:
+  azybase-net:
