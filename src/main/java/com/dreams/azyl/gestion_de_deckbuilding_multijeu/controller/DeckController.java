@@ -111,7 +111,8 @@ public class DeckController {
         List<PokemonCardDto> all = pokemonApiClient.getAllCards();
         int from = Math.min(pageable.getPageNumber() * pageable.getPageSize(), all.size());
         int to   = Math.min(from + pageable.getPageSize(), all.size());
-        model.addAttribute("cards", all.subList(from, to));
+        model.addAttribute("visibleCards", all.subList(from, to));
+        model.addAttribute("allCards", all);
         model.addAttribute("currentCardPage", pageable.getPageNumber());
         model.addAttribute("totalCardPages", (int)Math.ceil((double) all.size() / pageable.getPageSize()));
 

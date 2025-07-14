@@ -643,41 +643,83 @@
         document.querySelectorAll('.card').forEach(c => obs.observe(c));
     });
 
-    // Filtres par type global (pokemon/trainer/energy)
+</script>
+<script th:inline="javascript">
+    window.allCards = [[${allCards}]];
+</script>
+
+<script>
+    function renderCards(cards) {
+        const container = document.getElementById('card-collection');
+        container.innerHTML = '';
+
+        cards.forEach(card => {
+            const div = document.createElement('div');
+            div.className = "card card-compact bg-base-100 shadow-md card-hover animate__animated animate__fadeIn relative";
+            div.dataset.type = card.type.toLowerCase();
+            div.dataset.cardId = card.id;
+
+            div.innerHTML = `
+                <figure class="px-4 pt-4">
+                    <img src="${card.imageUrl}" alt="${card.name}" class="rounded-xl h-40 w-full object-contain" />
+                </figure>
+                <div class="card-body p-4">
+                    <div class="flex justify-between items-start">
+                        <h4 class="card-title text-sm">${card.name}</h4>
+                        <span class="type-badge">${card.type}</span>
+                    </div>
+                    <div class="flex justify-end mt-2">
+                        <button type="button" class="btn btn-sm btn-primary add-card-btn">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    // Filtres globaux (type: pokemon/trainer/energy)
     document.querySelectorAll('[data-filter]').forEach(el => {
         el.addEventListener('click', e => {
             e.preventDefault();
-            const filter = e.target.dataset.filter;
+            const wanted = e.target.dataset.filter.toLowerCase();
 
-            document.querySelectorAll('#card-collection .card').forEach(card => {
-                const cardType = card.dataset.type;
-                card.style.display = (filter === 'all' || cardType === filter) ? '' : 'none';
-            });
+            const filtered = window.allCards.filter(card =>
+                (card.type || '').toLowerCase() === wanted
+            );
+
+            renderCards(filtered);
         });
     });
 
+    // Filtres par type élémentaire (feu, eau, etc.)
     document.querySelectorAll('[data-type-filter]').forEach(el => {
         el.addEventListener('click', e => {
             e.preventDefault();
             const wanted = e.target.dataset.typeFilter.toLowerCase();
 
-            document.querySelectorAll('#card-collection .card').forEach(card => {
-                const badge = card.querySelector('.type-badge');
-                const text = badge?.textContent?.toLowerCase() || '';
-                card.style.display = text.includes(wanted) ? '' : 'none';
-            });
+            const filtered = window.allCards.filter(card =>
+                (card.type || '').toLowerCase().includes(wanted)
+            );
+
+            renderCards(filtered);
         });
     });
 
+    // Barre de recherche (par nom)
     document.getElementById('card-search').addEventListener('input', e => {
         const query = e.target.value.toLowerCase();
 
-        document.querySelectorAll('#card-collection .card').forEach(card => {
-            const name = card.querySelector('.card-title')?.textContent?.toLowerCase() || '';
-            card.style.display = name.includes(query) ? '' : 'none';
-        });
+        const filtered = window.allCards.filter(card =>
+            card.name.toLowerCase().includes(query)
+        );
+
+        renderCards(filtered);
     });
 
+    // Affiche la page actuelle au chargement
+    renderCards(window.allCards);
 </script>
 
 </body>
