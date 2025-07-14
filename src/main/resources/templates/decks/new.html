@@ -191,26 +191,26 @@
 
                         <div class="flex space-x-2">
                             <div class="form-control">
-                                <input type="text" placeholder="Rechercher une carte..." class="input input-bordered" />
+                                <input type="text" id="card-search" placeholder="Rechercher une carte..." class="input input-bordered" />
                             </div>
                             <div class="dropdown dropdown-end z-50">
                                 <label tabindex="0" class="btn btn-ghost">
                                     <i class="fas fa-filter mr-2"></i> Filtres
                                 </label>
                                 <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
-                                    <li><a>Pokémon</a></li>
-                                    <li><a>Dresseur</a></li>
-                                    <li><a>Énergie</a></li>
+                                    <li><a href="#" data-filter="pokemon">Pokémon</a></li>
+                                    <li><a href="#" data-filter="trainer">Dresseur</a></li>
+                                    <li><a href="#" data-filter="energy">Énergie</a></li>
                                     <li class="menu-title">Types</li>
-                                    <li><a>Feu</a></li>
-                                    <li><a>Eau</a></li>
-                                    <li><a>Plante</a></li>
-                                    <li><a>Électrik</a></li>
-                                    <li><a>Psy</a></li>
-                                    <li><a>Combat</a></li>
-                                    <li><a>Ténèbres</a></li>
-                                    <li><a>Métal</a></li>
-                                    <li><a>Fée</a></li>
+                                    <li><a href="#" data-type-filter="Feu">Feu</a></li>
+                                    <li><a href="#" data-type-filter="Eau">Eau</a></li>
+                                    <li><a href="#" data-type-filter="Plante">Plante</a></li>
+                                    <li><a href="#" data-type-filter="Électrik">Électrik</a></li>
+                                    <li><a href="#" data-type-filter="Psy">Psy</a></li>
+                                    <li><a href="#" data-type-filter="Combat">Combat</a></li>
+                                    <li><a href="#" data-type-filter="Ténèbres">Ténèbres</a></li>
+                                    <li><a href="#" data-type-filter="Métal">Métal</a></li>
+                                    <li><a href="#" data-type-filter="Fée">Fée</a></li>
                                 </ul>
                             </div>
                         </div>
@@ -221,7 +221,7 @@
                         <!-- Sample Pokémon Card -->
                         <div th:each="card : ${cards}"
                              class="card card-compact bg-base-100 shadow-md card-hover animate__animated animate__fadeIn relative"
-                             th:attr="data-type=${card.supertype == 'Pokémon' ? 'pokemon' : card.supertype == 'Trainer' ? 'trainer' : card.supertype == 'Energy'  ? 'energy': 'unknown'}, data-card-id=${card.id}">
+                             th:attr="data-type=${card.type}, data-card-id=${card.id}">
                             <figure class="px-4 pt-4">
                                 <img th:src="${card.imageUrl}" th:alt="${card.name}" class="rounded-xl h-40 w-full object-contain" />
                             </figure>
@@ -642,6 +642,42 @@
         }, { threshold: 0.1 });
         document.querySelectorAll('.card').forEach(c => obs.observe(c));
     });
+
+    // Filtres par type global (pokemon/trainer/energy)
+    document.querySelectorAll('[data-filter]').forEach(el => {
+        el.addEventListener('click', e => {
+            e.preventDefault();
+            const filter = e.target.dataset.filter;
+
+            document.querySelectorAll('#card-collection .card').forEach(card => {
+                const cardType = card.dataset.type;
+                card.style.display = (filter === 'all' || cardType === filter) ? '' : 'none';
+            });
+        });
+    });
+
+    document.querySelectorAll('[data-type-filter]').forEach(el => {
+        el.addEventListener('click', e => {
+            e.preventDefault();
+            const wanted = e.target.dataset.typeFilter.toLowerCase();
+
+            document.querySelectorAll('#card-collection .card').forEach(card => {
+                const badge = card.querySelector('.type-badge');
+                const text = badge?.textContent?.toLowerCase() || '';
+                card.style.display = text.includes(wanted) ? '' : 'none';
+            });
+        });
+    });
+
+    document.getElementById('card-search').addEventListener('input', e => {
+        const query = e.target.value.toLowerCase();
+
+        document.querySelectorAll('#card-collection .card').forEach(card => {
+            const name = card.querySelector('.card-title')?.textContent?.toLowerCase() || '';
+            card.style.display = name.includes(query) ? '' : 'none';
+        });
+    });
+
 </script>
 
 </body>

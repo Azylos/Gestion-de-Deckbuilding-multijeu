@@ -83,7 +83,12 @@ public class PokemonCardDto {
     }
 
     public String getType() {
-        return type;
+        return switch (supertype.toLowerCase()) {
+            case "pokémon" -> "pokemon";
+            case "trainer" -> "trainer";
+            case "energy"  -> "energy";
+            default        -> "unknown";
+        };
     }
 
     public void setType(String types) {
