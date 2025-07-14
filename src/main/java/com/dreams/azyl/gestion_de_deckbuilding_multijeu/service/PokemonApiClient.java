@@ -10,6 +10,7 @@
     import org.springframework.stereotype.Service;
     import org.springframework.web.client.RestTemplate;
 
+    import java.util.ArrayList;
     import java.util.List;
     import java.util.Optional;
 
@@ -48,11 +49,24 @@
         }
 
         public List<PokemonCardDto> getAllCards() {
-            String url = BASE_URL + "?pageSize=250";
+            List<PokemonCardDto> pokemons = fetchCardsBySupertype("Pokémon");
+            List<PokemonCardDto> trainers = fetchCardsBySupertype("Trainer");
+            List<PokemonCardDto> energies = fetchCardsBySupertype("Energy");
+
+            List<PokemonCardDto> all = new ArrayList<>();
+            all.addAll(pokemons);
+            all.addAll(trainers);
+            all.addAll(energies);
+
+            return all;
+        }
+
+        private List<PokemonCardDto> fetchCardsBySupertype(String supertype) {
+            String url = BASE_URL + "?pageSize=100&q=supertype:" + supertype;
             CardListResponse response = restTemplate.getForObject(url, CardListResponse.class);
 
             if (response == null || response.getData() == null) {
-                throw new EntityNotFoundException("Aucune carte trouvée");
+                return List.of();
             }
 
             return response.getData().stream()
